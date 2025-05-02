@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
-import yfinance as yf # Re-added yfinance
+import yfinance as yf # Back to yfinance for historical world gold
 import plotly.express as px
 from datetime import datetime, timedelta
 import time # Required for time.sleep
-# Removed requests and BeautifulSoup
+import requests # For scraping current price
+from bs4 import BeautifulSoup # For scraping current price
 
 # Import the specific function if possible, otherwise rely on vnstock being installed
 try:
@@ -16,11 +17,12 @@ except ImportError:
 
 # --- Constants ---
 GOLD_TICKER = 'GC=F' # World Gold ticker (USD/Ounce)
-# LOGO_URL_SIDEBAR = "https://res.cloudinary.com/dd7gti2kn/image/upload/v1745678186/samples/people/LOGO_LQP_msfted.png" # Logo constant kept but commented
+# LOGO_URL_SIDEBAR = "https://res.cloudinary.com/dd7gti2kn/image/upload/v1745678186/samples/people/LOGO_LQP_msfted.png"
 SJC_FETCH_INTERVAL_DAYS = 10
 SJC_FETCH_DELAY_SECONDS = 2
 SJC_TARGET_BRANCH = 'Hồ Chí Minh'
-CACHE_TTL_SECONDS = 21600 # Cache data for 6 hours
+CACHE_TTL_SECONDS = 21600 # Cache yfinance/vnstock data for 6 hours
+SCRAPE_CACHE_TTL_SECONDS = 60 # Cache scraped world gold price for 60 seconds
 
 # --- Set Page Config FIRST ---
 st.set_page_config(
@@ -58,25 +60,20 @@ st.markdown("""
 def fetch_world_gold_usd(start_date, end_date):
     """Fetches world gold data in USD/Ounce using yfinance. Returns (dataframe, raw_dataframe, error_type)"""
     try:
-        time.sleep(0.5) # Small delay
+        time.sleep(0.5)
         gold_data_raw = yf.download(GOLD_TICKER, start=start_date, end=end_date + timedelta(days=1), progress=False)
         if gold_data_raw.empty:
             return pd.DataFrame(), None, "nodata"
-
-        # Process data for chart
         processed_data = gold_data_raw[['Close']].copy()
-        # Handle potential MultiIndex columns just in case
         if isinstance(processed_data.columns, pd.MultiIndex):
             processed_data.columns = processed_data.columns.get_level_values(0)
             processed_data = processed_data.loc[:,~processed_data.columns.duplicated()]
         if 'Close' not in processed_data.columns: raise ValueError("Missing 'Close' column")
-
         processed_data.rename(columns={'Close': 'Giá TG (USD/oz)'}, inplace=True)
         processed_data.reset_index(inplace=True)
-        processed_data.rename(columns={'Date': 'Timestamp'}, inplace=True) # yfinance index is 'Date'
+        processed_data.rename(columns={'Date': 'Timestamp'}, inplace=True)
         processed_data['Timestamp'] = pd.to_datetime(processed_data['Timestamp'])
-
-        return processed_data, gold_data_raw, None # Return processed and raw data
+        return processed_data, gold_data_raw, None
     except Exception as e:
         error_str = str(e).lower()
         if 'ratelimit' in error_str or 'too many requests' in error_str:
@@ -85,6 +82,67 @@ def fetch_world_gold_usd(start_date, end_date):
         else:
              print(f"Error fetching world data: {e}")
              return pd.DataFrame(), None, "other"
+
+# --- Web Scraping Functions for Current World Gold Price ---
+def fetch_web_data():
+    """Tải nội dung HTML từ trang web Trading Economics."""
+    url = "https://tradingeconomics.com/commodities"
+    headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" }
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status()
+        return response.content
+    except requests.exceptions.RequestException as e:
+        print(f"Network or HTTP error fetching Trading Economics: {e}")
+        return None
+    except Exception as e:
+        print(f"Unknown error fetching web data: {e}")
+        return None
+
+def clean_major_name(major):
+    return major.split("\n\n")[0].strip() if "\n\n" in major else major.strip()
+
+def format_value(value):
+    try:
+        f_value = float(str(value).replace(',', ''))
+        return f"{f_value:.2f}"
+    except ValueError:
+        print(f"Cannot format value: {value}")
+        return None
+
+@st.cache_data(ttl=SCRAPE_CACHE_TTL_SECONDS) # Cache the scraped price briefly
+def get_world_gold_price_scrape():
+    """Trích xuất giá vàng thế giới hiện tại từ Trading Economics. Returns (price_float, error_type)"""
+    html_content = fetch_web_data()
+    if not html_content: return None, "fetch_error"
+    try:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        target_table = soup.find('table', {'class': 'table table-hover table-striped table-heatmap'})
+        if not target_table:
+            tables = soup.find_all('table')
+            if len(tables) < 2: return None, "parse_error_no_table"
+            target_table = tables[1]
+        rows = target_table.find_all('tr')
+        if not rows or len(rows) < 2: return None, "parse_error_no_rows"
+        data_rows = rows[1:]
+        for row in data_rows:
+            cols = row.find_all(['td', 'th'], recursive=False)
+            if len(cols) > 1:
+                commodity_name_element = cols[0].find('b')
+                if commodity_name_element:
+                    commodity_name = clean_major_name(commodity_name_element.text)
+                    if commodity_name == "Gold":
+                        price_str = cols[1].text.strip()
+                        formatted_price_str = format_value(price_str)
+                        if formatted_price_str is None: return None, "format_error"
+                        try:
+                            price_float = float(formatted_price_str)
+                            return price_float, None # Success
+                        except (ValueError, TypeError): return None, "conversion_error"
+        return None, "not_found"
+    except Exception as e:
+        print(f"Error parsing HTML: {e}")
+        return None, "parse_error_exception"
 
 # --- Data Fetching Function (SJC Historical Buy/Sell/Spread via vnstock) ---
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
@@ -95,8 +153,7 @@ def fetch_sjc_historical_data_buy_sell_spread(start_date, end_date):
     """
     all_sjc_prices = []
     current_date = start_date
-    rate_limit_encountered = False
-    other_error_encountered = False
+    rate_limit_encountered = False; other_error_encountered = False
     while current_date <= end_date:
         date_str = current_date.strftime("%Y-%m-%d")
         try:
@@ -142,7 +199,7 @@ def fetch_sjc_historical_data_buy_sell_spread(start_date, end_date):
 # --- Sidebar for Controls ---
 with st.sidebar:
     st.markdown("<p class='sidebar-title'>Le Quy Phat</p>", unsafe_allow_html=True)
-    st.header("📅 Thời gian") # Header now applies to both charts
+    st.header("📅 Thời gian Lịch sử") # Clarify date range is for historical charts
     st.write("")
     predefined_ranges = { "1 Tháng": 30, "3 Tháng": 90, "6 Tháng": 180, "1 Năm": 365, "Từ đầu năm (YTD)": "YTD", "Tất cả (Tối đa 10 năm)": "Max" }
     selected_range_label = st.selectbox("Chọn nhanh:", options=list(predefined_ranges.keys()), index=2)
@@ -156,36 +213,57 @@ with st.sidebar:
     start_date_input = st.date_input("Từ ngày", default_start_date_calc, label_visibility="collapsed")
     end_date_input = st.date_input("Đến ngày", default_end_date_calc, label_visibility="collapsed")
     start_date = start_date_input; end_date = end_date_input
-    final_label = f"{start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}" # Combined label
+    final_label_hist = f"{start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}" # Label for historical range
     if start_date > end_date: st.error("Lỗi: Ngày bắt đầu không được sau ngày kết thúc."); st.stop()
     st.divider()
     st.caption(f"SJC lấy mỗi {SJC_FETCH_INTERVAL_DAYS} ngày ({SJC_TARGET_BRANCH}).")
-    # Removed World Gold update button
+    st.divider()
+    st.header("🔄 Giá TG Hiện tại")
+    update_world_button = st.button("Lấy giá TG mới nhất", key="update_world", help="Lấy giá vàng thế giới hiện tại từ Trading Economics (có thể không ổn định).")
 
 # --- Main Page Layout ---
 st.title("📊 Biểu đồ Lịch sử Giá Vàng")
-st.caption(f"Giá TG (USD/oz) & Giá SJC (VND/cây) | Khoảng thời gian: {final_label}") # Updated caption
+st.caption(f"Giá TG (USD/oz) & Giá SJC (VND/cây) | Khoảng thời gian lịch sử: {final_label_hist}")
 st.write("")
 
 # --- Initialize variables ---
 world_data_error = False
 sjc_data_error = False
-world_gold_usd_hist = pd.DataFrame()
+world_gold_usd_hist = pd.DataFrame() # For historical yfinance data
 sjc_hist = pd.DataFrame()
 gold_hist_raw = None # Store raw yfinance data
+scraped_world_price = None # Store the manually scraped price
+scraped_world_fetch_error = None # Store scraping error type
 
-# --- Fetch World Data ---
+# --- Handle Scrape Button Click ---
+if update_world_button:
+    with st.spinner("Đang lấy giá TG mới nhất..."):
+        scraped_world_price, scraped_world_fetch_error = get_world_gold_price_scrape()
+        if scraped_world_fetch_error:
+            if scraped_world_fetch_error == "fetch_error": st.error("⚠️ Lỗi mạng hoặc không thể kết nối đến Trading Economics để lấy giá TG.", icon="🌐")
+            elif scraped_world_fetch_error == "not_found": st.error("⚠️ Không tìm thấy giá vàng ('Gold') trong dữ liệu từ Trading Economics.", icon="🔍")
+            else: st.error(f"❌ Đã xảy ra lỗi khi xử lý dữ liệu giá TG từ Trading Economics (code: {scraped_world_fetch_error}).")
+            scraped_world_price = None # Ensure price is None on error
+        elif scraped_world_price is not None:
+            st.success(f"Đã lấy giá TG hiện tại: ${scraped_world_price:.2f}")
+        else:
+             st.error("Không thể lấy hoặc xử lý giá vàng thế giới lần này.")
+
+
+# --- Fetch Historical World Data (yfinance) ---
 world_fetch_error_type = None
 fetch_world_success = False
-with st.spinner(f"Đang tải dữ liệu giá TG (USD/oz)..."):
-    world_gold_usd_hist, gold_hist_raw, world_fetch_error_type = fetch_world_gold_usd(start_date, end_date) # Use yfinance fetch
+with st.spinner(f"Đang tải dữ liệu lịch sử giá TG (USD/oz)..."):
+    world_gold_usd_hist, gold_hist_raw, world_fetch_error_type = fetch_world_gold_usd(start_date, end_date)
     if world_fetch_error_type: world_data_error = True
     elif world_gold_usd_hist.empty: world_data_error = True
     else: fetch_world_success = True
 
-if world_fetch_error_type == "ratelimit": st.warning("⚠️ **Giới hạn truy cập (Giá TG):** Máy chủ Yahoo Finance đang tạm thời giới hạn truy cập. Dữ liệu giá thế giới có thể không hiển thị. Vui lòng thử lại sau ít phút.", icon="⏳")
-elif world_fetch_error_type == "nodata": st.info("ℹ️ Không tìm thấy dữ liệu giá thế giới cho khoảng thời gian này.")
-elif world_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu giá thế giới.")
+# Display yfinance fetch status (only if scraping wasn't just attempted or failed)
+if world_fetch_error_type and not update_world_button: # Don't show yfinance error if user just tried scraping
+    if world_fetch_error_type == "ratelimit": st.warning("⚠️ **Giới hạn truy cập (Lịch sử TG):** Máy chủ Yahoo Finance đang tạm thời giới hạn truy cập. Biểu đồ lịch sử giá TG có thể không hiển thị. Vui lòng thử lại sau ít phút.", icon="⏳")
+    elif world_fetch_error_type == "nodata": st.info("ℹ️ Không tìm thấy dữ liệu lịch sử giá thế giới cho khoảng thời gian này.")
+    elif world_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu lịch sử giá thế giới.")
 
 # --- Fetch SJC Data ---
 sjc_fetch_error_type = None
@@ -201,7 +279,7 @@ with st.spinner(f"Đang tải dữ liệu giá SJC (Mua/Bán/Chênh lệch)...")
          fetch_sjc_success = True
 
 if sjc_fetch_error_type == "ratelimit": st.warning(f"⚠️ **Giới hạn truy cập (Giá SJC):** Có thể đã gặp giới hạn khi lấy dữ liệu SJC. Dữ liệu SJC có thể không đầy đủ hoặc không hiển thị. Vui lòng thử lại sau.", icon="⏳")
-elif sjc_fetch_error_type == "nodata": st.info(f"ℹ️ Không tìm thấy dữ liệu SJC nào cho khoảng thời gian này (dữ liệu được kiểm tra mỗi {SJC_FETCH_INTERVAL_DAYS} ngày).")
+elif sjc_fetch_error_type == "nodata": st.info(f"ℹ️ Không tìm thấy dữ liệu SJC nào cho khoảng thời gian này ({final_label_hist}).")
 elif sjc_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu SJC.")
 
 # --- Display Metrics ---
@@ -224,23 +302,35 @@ def get_scalar(value):
      if pd.isna(value): return None
      return value
 
-# Metric 1: World Gold (USD)
-latest_world_price_usd = None; latest_world_date = None; latest_world_date_str = "N/A"; delta_world_usd = None
-if not world_data_error and not world_gold_usd_hist.empty:
+# Metric 1: World Gold (USD) - Show scraped price if available, else historical
+latest_world_price_usd = None; latest_world_date = None; latest_world_date_str = "N/A"; delta_world_usd = None; metric1_label = "Giá TG (Lịch sử)"
+if scraped_world_price is not None:
+    latest_world_price_usd = scraped_world_price
+    latest_world_date_str = datetime.now().strftime('%H:%M') # Show current time
+    metric1_label = f"Giá TG ({latest_world_date_str})"
+    # Calculate delta based on comparison with last historical price
+    if not world_data_error and not world_gold_usd_hist.empty:
+        last_hist_price = get_scalar(world_gold_usd_hist.iloc[-1]['Giá TG (USD/oz)'])
+        if pd.notna(latest_world_price_usd) and pd.notna(last_hist_price):
+            delta_world_usd = latest_world_price_usd - last_hist_price
+elif not world_data_error and not world_gold_usd_hist.empty: # Fallback to historical data
     try:
         latest_row_world = world_gold_usd_hist.iloc[-1]
         latest_world_price_usd = get_scalar(latest_row_world['Giá TG (USD/oz)'])
         latest_world_date = get_scalar(latest_row_world['Timestamp'])
         if isinstance(latest_world_date, pd.Timestamp): latest_world_date_str = latest_world_date.strftime('%d/%m')
+        metric1_label = f"Giá TG ({latest_world_date_str})"
         if len(world_gold_usd_hist) > 1:
             prev_world_price_usd = get_scalar(world_gold_usd_hist.iloc[-2]['Giá TG (USD/oz)'])
             if pd.notna(latest_world_price_usd) and isinstance(latest_world_price_usd, (int, float, complex)) and \
                pd.notna(prev_world_price_usd) and isinstance(prev_world_price_usd, (int, float, complex)):
                  delta_world_usd = latest_world_price_usd - prev_world_price_usd
-    except Exception as e: print(f"Error processing world gold metric: {e}"); latest_world_price_usd = None; latest_world_date_str = "N/A"; delta_world_usd = None
-with col1: st.metric(label=f"Giá TG ({latest_world_date_str})", value=f"{latest_world_price_usd:,.2f} USD" if pd.notna(latest_world_price_usd) else "N/A", delta=format_delta(delta_world_usd, "USD"), help="Giá vàng thế giới (USD/Ounce)")
+    except Exception as e: print(f"Error processing world gold metric: {e}"); latest_world_price_usd = None; latest_world_date_str = "N/A"; delta_world_usd = None; metric1_label = "Giá TG (Lỗi)"
 
-# Metric 2: SJC Sell Price
+with col1: st.metric(label=metric1_label, value=f"{latest_world_price_usd:,.2f} USD" if pd.notna(latest_world_price_usd) else "N/A", delta=format_delta(delta_world_usd, "USD"), help="Giá vàng thế giới (USD/Ounce)")
+
+# Metrics 2, 3, 4 for SJC remain the same
+# ... (SJC metric code is unchanged) ...
 latest_sjc_sell = None; latest_sjc_date = None; latest_sjc_date_str = "N/A"; delta_sjc_sell = None
 if not sjc_data_error and not sjc_hist.empty:
     try:
@@ -255,8 +345,6 @@ if not sjc_data_error and not sjc_hist.empty:
                  delta_sjc_sell = latest_sjc_sell - prev_sjc_sell
     except Exception as e: print(f"Error processing SJC sell metric: {e}"); latest_sjc_sell = None; latest_sjc_date_str = "N/A"; delta_sjc_sell = None
 with col2: st.metric(label=f"SJC Bán ({latest_sjc_date_str})", value=f"{latest_sjc_sell:,.0f}" if pd.notna(latest_sjc_sell) else "N/A", delta=format_delta(delta_sjc_sell), help=f"Giá bán SJC tại {SJC_TARGET_BRANCH}")
-
-# Metric 3: SJC Buy Price
 latest_sjc_buy = None; delta_sjc_buy = None
 if not sjc_data_error and not sjc_hist.empty:
     try:
@@ -268,8 +356,6 @@ if not sjc_data_error and not sjc_hist.empty:
                  delta_sjc_buy = latest_sjc_buy - prev_sjc_buy
     except Exception as e: print(f"Error processing SJC buy metric: {e}"); latest_sjc_buy = None; delta_sjc_buy = None
 with col3: st.metric(label=f"SJC Mua ({latest_sjc_date_str})", value=f"{latest_sjc_buy:,.0f}" if pd.notna(latest_sjc_buy) else "N/A", delta=format_delta(delta_sjc_buy), help=f"Giá mua SJC tại {SJC_TARGET_BRANCH}")
-
-# Metric 4: SJC Spread
 latest_sjc_spread = None; delta_sjc_spread = None
 if not sjc_data_error and not sjc_hist.empty and 'Chênh lệch Mua/Bán SJC' in sjc_hist.columns:
     try:
@@ -282,20 +368,21 @@ if not sjc_data_error and not sjc_hist.empty and 'Chênh lệch Mua/Bán SJC' in
     except Exception as e: print(f"Error processing SJC spread metric: {e}"); latest_sjc_spread = None; delta_sjc_spread = None
 with col4: st.metric(label=f"Chênh lệch SJC ({latest_sjc_date_str})", value=f"{latest_sjc_spread:,.0f}" if pd.notna(latest_sjc_spread) else "N/A", delta=format_delta(delta_sjc_spread), help="Chênh lệch Mua/Bán SJC")
 
+
 st.divider()
 
 # --- Display World Gold Chart (USD/oz) ---
-st.subheader("🌍 Giá Vàng Thế Giới (USD/oz)")
-if world_data_error: st.info("Không có dữ liệu giá vàng thế giới để hiển thị.")
+st.subheader(f"🌍 Giá Vàng Thế Giới (USD/oz) - Lịch sử ({final_label_hist})") # Updated subheader
+if world_data_error: st.info("Không có dữ liệu lịch sử giá vàng thế giới để hiển thị.")
 elif not world_gold_usd_hist.empty:
     fig_world = px.line(world_gold_usd_hist, x='Timestamp', y='Giá TG (USD/oz)', labels={'Timestamp': 'Thời gian', 'Giá TG (USD/oz)': 'Giá (USD/oz)'})
     fig_world.update_traces(line_color='#0d6efd', hovertemplate="Ngày: %{x|%d/%m/%Y}<br>Giá: %{y:,.2f} USD<extra></extra>")
     fig_world.update_layout(hovermode="x unified", margin=dict(t=10, b=0, l=0, r=0))
     st.plotly_chart(fig_world, use_container_width=True)
-else: st.info("Không có dữ liệu giá vàng thế giới để hiển thị.")
+else: st.info("Không có dữ liệu lịch sử giá vàng thế giới để hiển thị.")
 
 # --- Display SJC Chart (Buy, Sell, Spread) ---
-st.subheader("🇻🇳 Giá Vàng SJC (VND/cây)")
+st.subheader(f"🇻🇳 Giá Vàng SJC (VND/cây) - Lịch sử ({final_label_hist})") # Updated subheader
 if sjc_data_error: st.info(f"Không có dữ liệu SJC để hiển thị.")
 elif not sjc_hist.empty:
     plot_sjc_df = sjc_hist.melt(id_vars=['Timestamp'], value_vars=['Giá Mua SJC (VND/cây)', 'Giá Bán SJC (VND/cây)', 'Chênh lệch Mua/Bán SJC'], var_name='Loại Giá', value_name='Giá (VND/cây)')
@@ -336,6 +423,6 @@ if expander_title_parts:
 st.divider()
 col_left, col_right = st.columns([0.7, 0.3])
 with col_left:
-     st.markdown(f"<p class='footer-caption'>Nguồn: Yahoo Finance (TG), vnstock (SJC). Tải lúc: {datetime.now().strftime('%H:%M:%S %d/%m/%Y')}</p>", unsafe_allow_html=True)
+     st.markdown(f"<p class='footer-caption'>Nguồn: Yahoo Finance (TG Lịch sử), Trading Economics (TG Hiện tại), vnstock (SJC). Tải lúc: {datetime.now().strftime('%H:%M:%S %d/%m/%Y')}</p>", unsafe_allow_html=True) # Updated source
 with col_right:
      st.markdown("<p class='footer-copyright'>Copyright ©LeQuyPhat</p>", unsafe_allow_html=True)
