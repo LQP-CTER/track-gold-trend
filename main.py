@@ -49,6 +49,12 @@ st.markdown("""
     [data-testid="stMetricValue"] { font-weight: 600; font-size: 1.7em; color: #1E1E1E; white-space: nowrap; overflow: hidden; text-overflow: clip; line-height: 1.3; }
     [data-testid="stMetricDelta"] { font-weight: 500; font-size: 0.9em; padding-top: 0.25rem; }
     h2 { margin-bottom: 0.8rem; margin-top: 1.5rem; }
+    /* Sidebar Header Style */
+    [data-testid="stSidebar"] h2 {
+        font-size: 1.15em; /* Adjust size */
+        margin-top: 0; /* Remove top margin for headers in sidebar */
+        padding-top: 0.5rem; /* Add padding above header */
+    }
     .stPlotlyChart { margin-bottom: 1.5rem; }
     .sidebar-title { font-size: 1.5em; font-weight: 600; padding-bottom: 1rem; text-align: center; color: #333; }
 </style>
@@ -110,7 +116,7 @@ def format_value(value):
         print(f"Cannot format value: {value}")
         return None
 
-@st.cache_data(ttl=SCRAPE_CACHE_TTL_SECONDS) # Cache the scraped price briefly
+@st.cache_data(ttl=SCRAPE_CACHE_TTL_SECONDS)
 def get_world_gold_price_scrape():
     """Trích xuất giá vàng thế giới hiện tại từ Trading Economics. Returns (price_float, error_type)"""
     html_content = fetch_web_data()
@@ -196,14 +202,19 @@ def fetch_sjc_historical_data_buy_sell_spread(start_date, end_date):
 
 # --- Streamlit App Layout ---
 
-# --- Sidebar for Controls ---
+# --- Sidebar for Controls - Rearranged ---
 with st.sidebar:
     st.markdown("<p class='sidebar-title'>Le Quy Phat</p>", unsafe_allow_html=True)
-    st.header("📅 Thời gian Lịch sử") # Clarify date range is for historical charts
-    st.write("")
+
+    # Section for Current World Gold Price Update
+    st.header("🔄 Giá TG Hiện tại")
+    update_world_button = st.button("Lấy giá TG mới nhất", key="update_world", help="Lấy giá vàng thế giới hiện tại từ Trading Economics (có thể không ổn định).")
+    st.divider()
+
+    # Section for Historical Data Selection
+    st.header("📅 Thời gian Lịch sử")
     predefined_ranges = { "1 Tháng": 30, "3 Tháng": 90, "6 Tháng": 180, "1 Năm": 365, "Từ đầu năm (YTD)": "YTD", "Tất cả (Tối đa 10 năm)": "Max" }
     selected_range_label = st.selectbox("Chọn nhanh:", options=list(predefined_ranges.keys()), index=2)
-    st.divider()
     st.markdown("**Hoặc chọn ngày:**")
     today = datetime.now().date()
     if selected_range_label == "Tất cả (Tối đa 10 năm)": default_start_date_calc = max(today - timedelta(days=10*365), datetime(2015, 1, 1).date())
@@ -213,13 +224,12 @@ with st.sidebar:
     start_date_input = st.date_input("Từ ngày", default_start_date_calc, label_visibility="collapsed")
     end_date_input = st.date_input("Đến ngày", default_end_date_calc, label_visibility="collapsed")
     start_date = start_date_input; end_date = end_date_input
-    final_label_hist = f"{start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}" # Label for historical range
+    final_label_hist = f"{start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}"
     if start_date > end_date: st.error("Lỗi: Ngày bắt đầu không được sau ngày kết thúc."); st.stop()
     st.divider()
+
+    # SJC Fetch Info Caption
     st.caption(f"SJC lấy mỗi {SJC_FETCH_INTERVAL_DAYS} ngày ({SJC_TARGET_BRANCH}).")
-    st.divider()
-    st.header("🔄 Giá TG Hiện tại")
-    update_world_button = st.button("Lấy giá TG mới nhất", key="update_world", help="Lấy giá vàng thế giới hiện tại từ Trading Economics (có thể không ổn định).")
 
 # --- Main Page Layout ---
 st.title("📊 Biểu đồ Lịch sử Giá Vàng")
@@ -229,11 +239,11 @@ st.write("")
 # --- Initialize variables ---
 world_data_error = False
 sjc_data_error = False
-world_gold_usd_hist = pd.DataFrame() # For historical yfinance data
+world_gold_usd_hist = pd.DataFrame()
 sjc_hist = pd.DataFrame()
-gold_hist_raw = None # Store raw yfinance data
-scraped_world_price = None # Store the manually scraped price
-scraped_world_fetch_error = None # Store scraping error type
+gold_hist_raw = None
+scraped_world_price = None
+scraped_world_fetch_error = None
 
 # --- Handle Scrape Button Click ---
 if update_world_button:
@@ -243,27 +253,27 @@ if update_world_button:
             if scraped_world_fetch_error == "fetch_error": st.error("⚠️ Lỗi mạng hoặc không thể kết nối đến Trading Economics để lấy giá TG.", icon="🌐")
             elif scraped_world_fetch_error == "not_found": st.error("⚠️ Không tìm thấy giá vàng ('Gold') trong dữ liệu từ Trading Economics.", icon="🔍")
             else: st.error(f"❌ Đã xảy ra lỗi khi xử lý dữ liệu giá TG từ Trading Economics (code: {scraped_world_fetch_error}).")
-            scraped_world_price = None # Ensure price is None on error
+            scraped_world_price = None
         elif scraped_world_price is not None:
             st.success(f"Đã lấy giá TG hiện tại: ${scraped_world_price:.2f}")
         else:
              st.error("Không thể lấy hoặc xử lý giá vàng thế giới lần này.")
 
-
 # --- Fetch Historical World Data (yfinance) ---
 world_fetch_error_type = None
 fetch_world_success = False
+# Only fetch historical data if not just scraped (to avoid immediate re-fetch/cache use)
+# Or always fetch historical data regardless of scraping? Let's always fetch for consistency.
 with st.spinner(f"Đang tải dữ liệu lịch sử giá TG (USD/oz)..."):
     world_gold_usd_hist, gold_hist_raw, world_fetch_error_type = fetch_world_gold_usd(start_date, end_date)
     if world_fetch_error_type: world_data_error = True
     elif world_gold_usd_hist.empty: world_data_error = True
     else: fetch_world_success = True
 
-# Display yfinance fetch status (only if scraping wasn't just attempted or failed)
-if world_fetch_error_type and not update_world_button: # Don't show yfinance error if user just tried scraping
-    if world_fetch_error_type == "ratelimit": st.warning("⚠️ **Giới hạn truy cập (Lịch sử TG):** Máy chủ Yahoo Finance đang tạm thời giới hạn truy cập. Biểu đồ lịch sử giá TG có thể không hiển thị. Vui lòng thử lại sau ít phút.", icon="⏳")
-    elif world_fetch_error_type == "nodata": st.info("ℹ️ Không tìm thấy dữ liệu lịch sử giá thế giới cho khoảng thời gian này.")
-    elif world_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu lịch sử giá thế giới.")
+# Display yfinance fetch status
+if world_fetch_error_type == "ratelimit": st.warning("⚠️ **Giới hạn truy cập (Lịch sử TG):** Máy chủ Yahoo Finance đang tạm thời giới hạn truy cập. Biểu đồ lịch sử giá TG có thể không hiển thị. Vui lòng thử lại sau ít phút.", icon="⏳")
+elif world_fetch_error_type == "nodata": st.info("ℹ️ Không tìm thấy dữ liệu lịch sử giá thế giới cho khoảng thời gian này.")
+elif world_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu lịch sử giá thế giới.")
 
 # --- Fetch SJC Data ---
 sjc_fetch_error_type = None
@@ -308,7 +318,6 @@ if scraped_world_price is not None:
     latest_world_price_usd = scraped_world_price
     latest_world_date_str = datetime.now().strftime('%H:%M') # Show current time
     metric1_label = f"Giá TG ({latest_world_date_str})"
-    # Calculate delta based on comparison with last historical price
     if not world_data_error and not world_gold_usd_hist.empty:
         last_hist_price = get_scalar(world_gold_usd_hist.iloc[-1]['Giá TG (USD/oz)'])
         if pd.notna(latest_world_price_usd) and pd.notna(last_hist_price):
@@ -330,7 +339,6 @@ elif not world_data_error and not world_gold_usd_hist.empty: # Fallback to histo
 with col1: st.metric(label=metric1_label, value=f"{latest_world_price_usd:,.2f} USD" if pd.notna(latest_world_price_usd) else "N/A", delta=format_delta(delta_world_usd, "USD"), help="Giá vàng thế giới (USD/Ounce)")
 
 # Metrics 2, 3, 4 for SJC remain the same
-# ... (SJC metric code is unchanged) ...
 latest_sjc_sell = None; latest_sjc_date = None; latest_sjc_date_str = "N/A"; delta_sjc_sell = None
 if not sjc_data_error and not sjc_hist.empty:
     try:
@@ -368,11 +376,10 @@ if not sjc_data_error and not sjc_hist.empty and 'Chênh lệch Mua/Bán SJC' in
     except Exception as e: print(f"Error processing SJC spread metric: {e}"); latest_sjc_spread = None; delta_sjc_spread = None
 with col4: st.metric(label=f"Chênh lệch SJC ({latest_sjc_date_str})", value=f"{latest_sjc_spread:,.0f}" if pd.notna(latest_sjc_spread) else "N/A", delta=format_delta(delta_sjc_spread), help="Chênh lệch Mua/Bán SJC")
 
-
 st.divider()
 
 # --- Display World Gold Chart (USD/oz) ---
-st.subheader(f"🌍 Giá Vàng Thế Giới (USD/oz) - Lịch sử ({final_label_hist})") # Updated subheader
+st.subheader(f"🌍 Giá Vàng Thế Giới (USD/oz) - Lịch sử ({final_label_hist})")
 if world_data_error: st.info("Không có dữ liệu lịch sử giá vàng thế giới để hiển thị.")
 elif not world_gold_usd_hist.empty:
     fig_world = px.line(world_gold_usd_hist, x='Timestamp', y='Giá TG (USD/oz)', labels={'Timestamp': 'Thời gian', 'Giá TG (USD/oz)': 'Giá (USD/oz)'})
@@ -382,7 +389,7 @@ elif not world_gold_usd_hist.empty:
 else: st.info("Không có dữ liệu lịch sử giá vàng thế giới để hiển thị.")
 
 # --- Display SJC Chart (Buy, Sell, Spread) ---
-st.subheader(f"🇻🇳 Giá Vàng SJC (VND/cây) - Lịch sử ({final_label_hist})") # Updated subheader
+st.subheader(f"🇻🇳 Giá Vàng SJC (VND/cây) - Lịch sử ({final_label_hist})")
 if sjc_data_error: st.info(f"Không có dữ liệu SJC để hiển thị.")
 elif not sjc_hist.empty:
     plot_sjc_df = sjc_hist.melt(id_vars=['Timestamp'], value_vars=['Giá Mua SJC (VND/cây)', 'Giá Bán SJC (VND/cây)', 'Chênh lệch Mua/Bán SJC'], var_name='Loại Giá', value_name='Giá (VND/cây)')
