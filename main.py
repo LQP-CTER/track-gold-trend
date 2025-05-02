@@ -4,7 +4,7 @@ import yfinance as yf # Re-added yfinance
 import plotly.express as px
 from datetime import datetime, timedelta
 import time # Required for time.sleep
-# Removed requests and BeautifulSoup as scraping is removed
+# Removed requests and BeautifulSoup
 
 # Import the specific function if possible, otherwise rely on vnstock being installed
 try:
@@ -44,8 +44,8 @@ st.markdown("""
     [data-testid="stMetric"] { background-color: #FFFFFF; border: 1px solid #e6e6e6; border-radius: 0.5rem; padding: 1rem 1.25rem; transition: box-shadow 0.2s ease-in-out; }
     [data-testid="stMetric"]:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     [data-testid="stMetricLabel"] { font-weight: 500; color: #555555; font-size: 0.9em; padding-bottom: 0.25rem; }
-    [data-testid="stMetricValue"] { font-weight: 700; font-size: 1.8em; color: #1E1E1E; line-height: 1.2; } /* Adjusted size */
-    [data-testid="stMetricDelta"] { font-weight: 500; font-size: 0.9em; padding-top: 0.25rem; } /* Adjusted size */
+    [data-testid="stMetricValue"] { font-weight: 600; font-size: 1.7em; color: #1E1E1E; white-space: nowrap; overflow: hidden; text-overflow: clip; line-height: 1.3; }
+    [data-testid="stMetricDelta"] { font-weight: 500; font-size: 0.9em; padding-top: 0.25rem; }
     h2 { margin-bottom: 0.8rem; margin-top: 1.5rem; }
     .stPlotlyChart { margin-bottom: 1.5rem; }
     .sidebar-title { font-size: 1.5em; font-weight: 600; padding-bottom: 1rem; text-align: center; color: #333; }
@@ -65,9 +65,15 @@ def fetch_world_gold_usd(start_date, end_date):
 
         # Process data for chart
         processed_data = gold_data_raw[['Close']].copy()
+        # Handle potential MultiIndex columns just in case
+        if isinstance(processed_data.columns, pd.MultiIndex):
+            processed_data.columns = processed_data.columns.get_level_values(0)
+            processed_data = processed_data.loc[:,~processed_data.columns.duplicated()]
+        if 'Close' not in processed_data.columns: raise ValueError("Missing 'Close' column")
+
         processed_data.rename(columns={'Close': 'Giá TG (USD/oz)'}, inplace=True)
         processed_data.reset_index(inplace=True)
-        processed_data.rename(columns={'Date': 'Timestamp'}, inplace=True)
+        processed_data.rename(columns={'Date': 'Timestamp'}, inplace=True) # yfinance index is 'Date'
         processed_data['Timestamp'] = pd.to_datetime(processed_data['Timestamp'])
 
         return processed_data, gold_data_raw, None # Return processed and raw data
