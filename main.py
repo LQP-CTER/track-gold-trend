@@ -49,12 +49,6 @@ st.markdown("""
     [data-testid="stMetricValue"] { font-weight: 600; font-size: 1.7em; color: #1E1E1E; white-space: nowrap; overflow: hidden; text-overflow: clip; line-height: 1.3; }
     [data-testid="stMetricDelta"] { font-weight: 500; font-size: 0.9em; padding-top: 0.25rem; }
     h2 { margin-bottom: 0.8rem; margin-top: 1.5rem; }
-    /* Sidebar Header Style */
-    [data-testid="stSidebar"] h2 {
-        font-size: 1.15em; /* Adjust size */
-        margin-top: 0; /* Remove top margin for headers in sidebar */
-        padding-top: 0.5rem; /* Add padding above header */
-    }
     .stPlotlyChart { margin-bottom: 1.5rem; }
     .sidebar-title { font-size: 1.5em; font-weight: 600; padding-bottom: 1rem; text-align: center; color: #333; }
 </style>
@@ -255,25 +249,24 @@ if update_world_button:
             else: st.error(f"❌ Đã xảy ra lỗi khi xử lý dữ liệu giá TG từ Trading Economics (code: {scraped_world_fetch_error}).")
             scraped_world_price = None
         elif scraped_world_price is not None:
-            st.success(f"Đã lấy giá TG hiện tại: ${scraped_world_price:.2f}")
+            st.toast(f"Đã lấy giá TG hiện tại: ${scraped_world_price:.2f}", icon="✅") # Use toast for success
         else:
              st.error("Không thể lấy hoặc xử lý giá vàng thế giới lần này.")
 
 # --- Fetch Historical World Data (yfinance) ---
 world_fetch_error_type = None
 fetch_world_success = False
-# Only fetch historical data if not just scraped (to avoid immediate re-fetch/cache use)
-# Or always fetch historical data regardless of scraping? Let's always fetch for consistency.
 with st.spinner(f"Đang tải dữ liệu lịch sử giá TG (USD/oz)..."):
     world_gold_usd_hist, gold_hist_raw, world_fetch_error_type = fetch_world_gold_usd(start_date, end_date)
     if world_fetch_error_type: world_data_error = True
     elif world_gold_usd_hist.empty: world_data_error = True
     else: fetch_world_success = True
 
-# Display yfinance fetch status
-if world_fetch_error_type == "ratelimit": st.warning("⚠️ **Giới hạn truy cập (Lịch sử TG):** Máy chủ Yahoo Finance đang tạm thời giới hạn truy cập. Biểu đồ lịch sử giá TG có thể không hiển thị. Vui lòng thử lại sau ít phút.", icon="⏳")
-elif world_fetch_error_type == "nodata": st.info("ℹ️ Không tìm thấy dữ liệu lịch sử giá thế giới cho khoảng thời gian này.")
-elif world_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu lịch sử giá thế giới.")
+# Display yfinance fetch status (only if scraping wasn't just attempted or failed)
+if world_fetch_error_type and not update_world_button:
+    if world_fetch_error_type == "ratelimit": st.warning("⚠️ **Giới hạn truy cập (Lịch sử TG):** Máy chủ Yahoo Finance đang tạm thời giới hạn truy cập. Biểu đồ lịch sử giá TG có thể không hiển thị. Vui lòng thử lại sau ít phút.", icon="⏳")
+    elif world_fetch_error_type == "nodata": st.info("ℹ️ Không tìm thấy dữ liệu lịch sử giá thế giới cho khoảng thời gian này.")
+    elif world_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu lịch sử giá thế giới.")
 
 # --- Fetch SJC Data ---
 sjc_fetch_error_type = None
@@ -288,9 +281,11 @@ with st.spinner(f"Đang tải dữ liệu giá SJC (Mua/Bán/Chênh lệch)...")
          sjc_hist['Timestamp'] = pd.to_datetime(sjc_hist['Timestamp'])
          fetch_sjc_success = True
 
+# Display SJC status message outside spinner (only show errors/warnings)
 if sjc_fetch_error_type == "ratelimit": st.warning(f"⚠️ **Giới hạn truy cập (Giá SJC):** Có thể đã gặp giới hạn khi lấy dữ liệu SJC. Dữ liệu SJC có thể không đầy đủ hoặc không hiển thị. Vui lòng thử lại sau.", icon="⏳")
-elif sjc_fetch_error_type == "nodata": st.info(f"ℹ️ Không tìm thấy dữ liệu SJC nào cho khoảng thời gian này ({final_label_hist}).")
+elif sjc_fetch_error_type == "nodata": st.info(f"ℹ️ Không tìm thấy dữ liệu SJC nào cho khoảng thời gian đã chọn ({final_label_hist}).")
 elif sjc_fetch_error_type == "other": st.error("❌ Đã xảy ra lỗi khi tải dữ liệu SJC.")
+
 
 # --- Display Metrics ---
 col1, col2, col3, col4 = st.columns(4)
@@ -314,9 +309,9 @@ def get_scalar(value):
 
 # Metric 1: World Gold (USD) - Show scraped price if available, else historical
 latest_world_price_usd = None; latest_world_date = None; latest_world_date_str = "N/A"; delta_world_usd = None; metric1_label = "Giá TG (Lịch sử)"
-if scraped_world_price is not None:
+if scraped_world_price is not None: # Prioritize scraped price if available
     latest_world_price_usd = scraped_world_price
-    latest_world_date_str = datetime.now().strftime('%H:%M') # Show current time
+    latest_world_date_str = datetime.now().strftime('%H:%M')
     metric1_label = f"Giá TG ({latest_world_date_str})"
     if not world_data_error and not world_gold_usd_hist.empty:
         last_hist_price = get_scalar(world_gold_usd_hist.iloc[-1]['Giá TG (USD/oz)'])
@@ -339,6 +334,7 @@ elif not world_data_error and not world_gold_usd_hist.empty: # Fallback to histo
 with col1: st.metric(label=metric1_label, value=f"{latest_world_price_usd:,.2f} USD" if pd.notna(latest_world_price_usd) else "N/A", delta=format_delta(delta_world_usd, "USD"), help="Giá vàng thế giới (USD/Ounce)")
 
 # Metrics 2, 3, 4 for SJC remain the same
+# ... (SJC metric code is unchanged) ...
 latest_sjc_sell = None; latest_sjc_date = None; latest_sjc_date_str = "N/A"; delta_sjc_sell = None
 if not sjc_data_error and not sjc_hist.empty:
     try:
