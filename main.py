@@ -198,7 +198,7 @@ def fetch_sjc_historical_data_buy_sell_spread(start_date, end_date):
 
 # --- Sidebar for Controls - Rearranged ---
 with st.sidebar:
-    st.markdown("<p class='sidebar-title'>Le Quy Phat</p>", unsafe_allow_html=True)
+    st.markdown("<p class='sidebar-title'>Gold Trend Chart</p>", unsafe_allow_html=True)
 
     # Section for Current World Gold Price Update
     st.header("🔄 Giá TG Hiện tại")
