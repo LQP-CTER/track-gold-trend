@@ -1,15 +1,9 @@
-<<<<<<< HEAD
 streamlit
 pandas
+numpy
 yfinance
 plotly
+requests
+beautifulsoup4
+scikit-learn
 vnstock
-datetime
-=======
-streamlit
-pandas
-yfinance
-plotly
-vnstock
-datetime
->>>>>>> f112762b5a73e4b7342d6681bd6fe9cbf5fbd89f
