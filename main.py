@@ -13,9 +13,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score
 
-# ==========================================
-# 1. CẤU HÌNH TRANG WEB (SETUP)
-# ==========================================
 st.set_page_config(
     page_title="Gold Trend Pro",
     layout="wide",
@@ -103,9 +100,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# 2. KHAI BÁO HẰNG SỐ (CONSTANTS)
-# ==========================================
+
 GOLD_TICKER = 'GC=F'    # Mã vàng thế giới trên Yahoo
 USDVND_TICKER = 'VND=X' # Mã tỷ giá USD/VND
 CACHE_TTL = 21600       # Cache 6 tiếng để đỡ tốn request
@@ -119,9 +114,6 @@ try:
 except ImportError:
     VNSTOCK_AVAILABLE = False
 
-# ==========================================
-# 3. CÁC HÀM XỬ LÝ DỮ LIỆU (DATA FUNCTIONS)
-# ==========================================
 
 @st.cache_data(ttl=CACHE_TTL)
 def fetch_financial_data(start_date, end_date):
@@ -218,9 +210,6 @@ def get_live_world_price():
         return None
     return None
 
-# ---------------------------------------------------------
-# 4. CHUẨN BỊ DỮ LIỆU & TÍNH TOÁN
-# ---------------------------------------------------------
 
 def process_data_with_currency(df, currency_mode):
     """
@@ -295,11 +284,8 @@ def style_chart(fig):
     )
     return fig
 
-# ---------------------------------------------------------
-# 5. GIAO DIỆN CHÍNH (MAIN UI)
-# ---------------------------------------------------------
 
-# --- SIDEBAR: KHU VỰC ĐIỀU KHIỂN ---
+
 with st.sidebar:
     st.markdown("""
         <div class="sidebar-logo-container">
@@ -349,7 +335,6 @@ with st.sidebar:
             </div>
         """, unsafe_allow_html=True)
     
-    # Khung Filter: Nút Live Price
     with st.container(border=True):
         st.markdown('<span class="sidebar-label">⚡ DỮ LIỆU THỰC</span>', unsafe_allow_html=True)
         live_price = None
@@ -366,7 +351,7 @@ with st.spinner("Đang tải dữ liệu..."):
     df_world, w_err = fetch_financial_data(start_input, end_input)
     df_sjc, s_err = fetch_sjc_data(start_input, end_input)
 
-# --- XỬ LÝ DỮ LIỆU CHÍNH ---
+# --- XỬ LÝ DỮ LIỆU  ---
 if not df_world.empty:
     # 1. Đổi tiền tệ (USD <-> VND)
     df_processed = process_data_with_currency(df_world, currency_mode)
@@ -380,11 +365,9 @@ st.markdown(f"## 📊 Bảng Tin Thị Trường Vàng ({currency_mode})")
 st.markdown(f"**Cập nhật:** {datetime.now().strftime('%H:%M %d/%m/%Y')}")
 
 # Tạo 4 Tab chính
-tab1, tab2, tab3, tab4 = st.tabs(["TỔNG QUAN", "HIỆU SUẤT ĐẦU TƯ", "PHÂN TÍCH KỸ THUẬT", "DỰ BÁO AI"])
+tab1, tab2, tab3, tab4 = st.tabs(["TỔNG QUAN", "HIỆU SUẤT ĐẦU TƯ", "PHÂN TÍCH KỸ THUẬT", "Machine Learning"])
 
-# ==========================================
-# TAB 1: TỔNG QUAN
-# ==========================================
+
 with tab1:
     st.markdown("### 📌 Chỉ Số Quan Trọng")
     c1, c2, c3, c4 = st.columns(4)
@@ -411,7 +394,6 @@ with tab1:
     c4.metric("SJC Bán Ra (VND)", f"{sjc_val:,.2f} Tr" if sjc_val else "N/A")
     st.divider()
 
-    # Lưu ý: Luôn kiểm tra df_full không rỗng trước khi vẽ để tránh lỗi
     if not df_full.empty:
         # Chart 1: Xu hướng chính (Area)
         st.markdown(f"##### 1. Xu Hướng Giá Vàng ({unit_label})")
@@ -452,9 +434,7 @@ with tab1:
     else:
         st.warning("⚠️ Không có dữ liệu để vẽ biểu đồ.")
 
-# ==========================================
-# TAB 2: HIỆU SUẤT & RỦI RO
-# ==========================================
+
 with tab2:
     st.markdown(f"### 💰 Phân Tích Lợi Nhuận ({currency_mode})")
     
@@ -508,9 +488,7 @@ with tab2:
     else:
         st.info("Chưa có dữ liệu phân tích.")
 
-# ==========================================
-# TAB 3: PHÂN TÍCH KỸ THUẬT
-# ==========================================
+
 with tab3:
     st.markdown(f"### 🛠️ Chỉ Báo Kỹ Thuật ({unit_label})")
     
@@ -561,9 +539,7 @@ with tab3:
     else:
         st.info("Chưa có dữ liệu phân tích.")
 
-# ==========================================
-# TAB 4: DỰ BÁO AI (MACHINE LEARNING)
-# ==========================================
+
 with tab4:
     st.markdown(f"### 🤖 Phòng Thí Nghiệm AI ({currency_mode})")
     
@@ -635,4 +611,4 @@ with tab4:
         st.info("Chưa có dữ liệu để chạy AI.")
 
 st.markdown("---")
-st.caption("Data Analyst Project | Powered by Streamlit & Yahoo Finance")
+st.caption("Data Analyst Project | Titus Le | Powered by Streamlit & Yahoo Finance")
