@@ -420,6 +420,22 @@ def fetch_sjc_data(start_date, end_date):
     df_result = df_cache.loc[mask]
     
     if df_result.empty:
+        try:
+            url = "https://webgia.com/gia-vang/sjc/"
+            r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            tds = soup.find_all('td')
+            if len(tds) > 2:
+                buy_p = float(tds[1].text.replace('.', ''))
+                sell_p = float(tds[2].text.replace('.', ''))
+                if buy_p < 20000000:
+                    buy_p *= 10
+                    sell_p *= 10
+                df_fallback = pd.DataFrame({'Date': [datetime.now().date()], 'SJC_Buy': [buy_p], 'SJC_Sell': [sell_p]})
+                df_fallback.set_index('Date', inplace=True)
+                return df_fallback, None
+        except:
+            pass
         return pd.DataFrame(), "No SJC data found."
     return df_result, None
 
