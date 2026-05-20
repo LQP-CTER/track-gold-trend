@@ -1,0 +1,11 @@
+# Cache và môi trường ảo
+sjc_history_cache.csv
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Files bảo mật (KHÔNG BAO GIỜ ĐƯỢC PUSH LÊN GIT)
+.streamlit/secrets.toml
+.env

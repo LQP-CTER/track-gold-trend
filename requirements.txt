@@ -3,7 +3,6 @@ pandas
 numpy
 yfinance
 plotly
+scikit-learn
 requests
 beautifulsoup4
-scikit-learn
-vnstock
