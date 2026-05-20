@@ -6,3 +6,4 @@ plotly
 scikit-learn
 requests
 beautifulsoup4
+vnstock
