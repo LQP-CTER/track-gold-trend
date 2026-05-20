@@ -331,8 +331,9 @@ def fetch_financial_data(start_date, end_date):
         except KeyError:
             return pd.DataFrame(), "Data structure error from Yahoo Finance."
 
-        df_merge = df_gold.join(df_usd, how='inner')
-        df_merge = df_merge.dropna()
+        df_merge = df_gold.join(df_usd, how='outer')
+        df_merge['USDVND'] = df_merge['USDVND'].ffill().bfill()
+        df_merge = df_merge.dropna(subset=['Gold_Close'])
         
         df_merge['Gold_VND'] = (df_merge['Gold_Close'] * df_merge['USDVND'] * OUNCE_TO_TAEL) / 1e6
         
