@@ -69,12 +69,12 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 }
 
 .sidebar-label {
-    font-size: 10px;
-    color: #94A3B8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: block;
-    margin-bottom: 8px;
+    font-size: 10px !important;
+    color: #94A3B8 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    display: block !important;
+    margin-bottom: 8px !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
@@ -115,7 +115,13 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     font-weight: 600 !important;
     letter-spacing: -0.5px !important;
 }
-p, label, span { color: #475569 !important; }
+
+/* Scoped global styles using :not() to avoid breaking custom HTML elements like the Quant Terminal and AI Insights */
+p:not(.quant-terminal *):not(.ai-insight-container *),
+span:not(.quant-terminal *):not(.ai-insight-container *):not(.sidebar-label),
+label:not(.quant-terminal *):not(.ai-insight-container *) {
+    color: #475569 !important;
+}
 
 /* ===== TABS ===== */
 .stTabs [data-baseweb="tab-list"] {
@@ -247,6 +253,94 @@ p, label, span { color: #475569 !important; }
     font-family: 'JetBrains Mono', monospace;
 }
 
+/* ===== AI INSIGHT CARDS (Light Glassmorphism) ===== */
+.ai-insight-container {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-left: 3px solid #D97706 !important;
+    border-radius: 0 6px 6px 0 !important;
+    padding: 16px 20px !important;
+    margin-top: -15px !important;
+    margin-bottom: 25px !important;
+    box-shadow: 0 2px 12px rgba(9, 30, 66, 0.02) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+.ai-insight-title {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 10px !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+}
+.ai-insight-body, .ai-insight-body p, .ai-insight-body span {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    color: #1E293B !important;
+    line-height: 1.6 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+}
+.ai-insight-body strong {
+    color: #0F172A !important;
+    font-weight: 600 !important;
+}
+
+/* ===== QUANT TERMINAL (Dark Mode Fintech Console) ===== */
+.quant-terminal {
+    background-color: #0F172A !important; /* Premium Slate Dark */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 25px 30px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 45px rgba(0, 0, 0, 0.15) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    position: relative !important;
+}
+.terminal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 20px !important;
+}
+.dot-red, .dot-yellow, .dot-green {
+    display: inline-block !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+}
+.dot-red { background-color: #EF4444 !important; }
+.dot-yellow { background-color: #F59E0B !important; }
+.dot-green { background-color: #10B981 !important; }
+.terminal-title {
+    color: #94A3B8 !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    margin-left: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+.status-active {
+    color: #10B981 !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+.terminal-body, .terminal-body p, .terminal-body span, .terminal-body br {
+    color: #F1F5F9 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13.5px !important;
+    line-height: 1.8 !important;
+}
+.terminal-body strong {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
 /* ===== FOOTER ===== */
 .footer {
     text-align: left;
@@ -280,7 +374,7 @@ def t(vi_text, en_text):
 
 
 def render_chart_insight(data_dict, chart_name):
-    """Helper to generate and display AI insight per chart (Dark Theme compatible)"""
+    """Helper to generate and display AI insight per chart (Light Glassmorphism Theme)"""
     lang_code = 'VN' if st.session_state.get('lang', 'Tiếng Việt') == 'Tiếng Việt' else 'EN'
     spinner_text = "Phân tích AI..." if lang_code == 'VN' else "AI Analyzing..."
     with st.spinner(spinner_text):
@@ -290,9 +384,9 @@ def render_chart_insight(data_dict, chart_name):
             lang=lang_code
         )
     st.markdown(f"""
-    <div style="background-color: #0A0A0A; border-left: 2px solid #FFFFFF; padding: 12px 16px; margin-top: -15px; margin-bottom: 25px; border-top: 1px solid #1A1A1A; border-right: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; border-radius: 0 4px 4px 0;">
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">AI Market Insight</span>
-        <span style="font-family: 'Inter', sans-serif; font-size: 12px; color: #E5E5E5; line-height: 1.6; display: block;">{insight}</span>
+    <div class="ai-insight-container">
+        <div class="ai-insight-title">AI Market Insight</div>
+        <div class="ai-insight-body">{insight}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1067,19 +1161,19 @@ with tab4:
                     
                     report_html = report.replace('\n', '<br>')
                     st.markdown(f"""
-                    <div style="background-color: #060608; border: 1px solid rgba(255,255,255,0.06); padding: 25px 30px; border-radius: 6px; box-shadow: 0 10px 45px rgba(0,0,0,0.65); font-family: 'JetBrains Mono', monospace; line-height: 1.7; position: relative;">
+                    <div class="quant-terminal">
                         <!-- Terminal header -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 20px;">
+                        <div class="terminal-header">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 8px; height: 8px; background-color: #FF5F56; border-radius: 50%;"></span>
-                                <span style="display: inline-block; width: 8px; height: 8px; background-color: #FFBD2E; border-radius: 50%;"></span>
-                                <span style="display: inline-block; width: 8px; height: 8px; background-color: #27C93F; border-radius: 50%;"></span>
-                                <span style="color: #666666; font-size: 10px; margin-left: 10px; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">QUANT INTELLIGENCE REPORT v3.1</span>
+                                <span class="dot-red"></span>
+                                <span class="dot-yellow"></span>
+                                <span class="dot-green"></span>
+                                <span class="terminal-title">QUANT INTELLIGENCE REPORT v3.1</span>
                             </div>
-                            <span style="color: #10B981; font-size: 10px; font-weight: 500; font-family: 'JetBrains Mono', monospace;">● SYSTEM ACTIVE</span>
+                            <span class="status-active">● SYSTEM ACTIVE</span>
                         </div>
                         <!-- Terminal body -->
-                        <div style="color: #D4D4D8; font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.8;">
+                        <div class="terminal-body">
                             {report_html}
                         </div>
                     </div>
