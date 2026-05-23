@@ -28,48 +28,49 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS tùy chỉnh: Tối giản, không icon, phong cách doanh nghiệp (Fintech/Enterprise)
+# CSS tùy chỉnh: Tối giản, phong cách doanh nghiệp Fintech/Enterprise cao cấp (Glassmorphism & OLED Dark)
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ===== BASE ===== */
 html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
 .stApp {
-    background-color: #050505 !important;
+    background-color: #030303 !important;
 }
 
 /* ===== SIDEBAR ===== */
 [data-testid="stSidebar"] {
-    background: #0A0A0A !important;
-    border-right: 1px solid #1A1A1A !important;
+    background: #060608 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 [data-testid="stSidebar"] > div { padding-top: 0 !important; }
 
 .brand-header {
     padding: 30px 20px 20px;
-    border-bottom: 1px solid #1A1A1A;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     margin-bottom: 20px;
 }
 .brand-header h1 {
-    font-size: 24px;
-    font-weight: 400;
-    color: #E5E5E5;
+    font-family: 'Outfit', sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+    color: #FFFFFF;
     margin: 0;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 .brand-header p {
-    font-size: 11px;
+    font-size: 10px;
     color: #666666;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     margin: 4px 0 0;
 }
 
 .sidebar-label {
-    font-size: 11px;
-    color: #888888;
+    font-size: 10px;
+    color: #555555;
     text-transform: uppercase;
     letter-spacing: 1px;
     display: block;
@@ -79,14 +80,14 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid #1A1A1A !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
     border-radius: 0 !important;
     padding-bottom: 20px !important;
     margin-bottom: 20px !important;
 }
 
 .date-text {
-    color: #A0A0A0;
+    color: #888888;
     font-size: 12px;
     font-family: 'JetBrains Mono', monospace;
     margin-top: 8px;
@@ -96,41 +97,45 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     background: #FFFFFF !important;
     color: #000000 !important;
     border: 1px solid #FFFFFF !important;
-    border-radius: 4px !important;
+    border-radius: 3px !important;
     font-weight: 500 !important;
-    font-size: 13px !important;
-    transition: all 0.2s ease !important;
+    font-size: 12px !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 [data-testid="stSidebar"] div.stButton > button:hover {
     background: #E5E5E5 !important;
     border-color: #E5E5E5 !important;
+    transform: translateY(-1px) !important;
 }
 
 /* ===== MAIN TEXT ===== */
 .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 { 
+    font-family: 'Outfit', sans-serif !important;
     color: #FFFFFF !important; 
-    font-weight: 400 !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.3px !important;
 }
-p, label, span { color: #A0A0A0 !important; }
+p, label, span { color: #888888 !important; }
 
 /* ===== TABS ===== */
 .stTabs [data-baseweb="tab-list"] {
     gap: 0;
     background: transparent;
     padding: 0;
-    border-bottom: 1px solid #1A1A1A;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 .stTabs [data-baseweb="tab"] {
     height: 48px;
     background: transparent;
     border-radius: 0;
-    color: #666666;
+    color: #555555;
     font-weight: 500;
     font-size: 14px;
     border: none;
     border-bottom: 2px solid transparent;
-    margin-right: 30px;
+    margin-right: 35px;
     padding: 0 4px;
+    transition: all 0.2s ease !important;
 }
 .stTabs [data-baseweb="tab"]:hover { color: #FFFFFF; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] {
@@ -140,85 +145,103 @@ p, label, span { color: #A0A0A0 !important; }
 
 /* ===== HERO HEADER ===== */
 .hero-header {
-    padding: 10px 0 30px;
-    border-bottom: 1px solid #1A1A1A;
+    padding: 10px 0 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     margin-bottom: 30px;
 }
 .hero-title {
-    font-size: 32px;
-    font-weight: 400;
+    font-family: 'Outfit', sans-serif;
+    font-size: 30px;
+    font-weight: 500;
     color: #FFFFFF;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
+    letter-spacing: -0.5px;
 }
 .hero-subtitle { 
-    font-size: 13px; 
-    color: #888888; 
+    font-size: 12px; 
+    color: #666666; 
     margin: 0;
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* ===== METRIC CARDS ===== */
+/* ===== METRIC CARDS (Glassmorphism) ===== */
 .metric-container {
-    padding: 20px;
-    background: #0A0A0A;
-    border: 1px solid #1A1A1A;
-    border-radius: 4px;
+    padding: 22px 24px;
+    background: rgba(10, 10, 12, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: 6px !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
     height: 100%;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.metric-container:hover {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-2px) !important;
 }
 .metric-label {
-    font-size: 12px;
-    color: #888888;
+    font-size: 11px;
+    color: #666666;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     margin-bottom: 12px;
 }
 .metric-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 28px;
-    font-weight: 400;
+    font-size: 26px;
+    font-weight: 500;
     color: #FFFFFF;
     margin-bottom: 8px;
     line-height: 1;
 }
 .metric-sub {
-    font-size: 13px;
+    font-size: 12.5px;
     font-family: 'JetBrains Mono', monospace;
 }
-.text-up { color: #4CAF50; }
-.text-down { color: #F44336; }
-.text-neutral { color: #888888; }
+.text-up { color: #10B981; }      /* Emerald green */
+.text-down { color: #EF4444; }    /* Rose red */
+.text-neutral { color: #555555; }
 
 /* ===== SECTION DIVIDER ===== */
 .section-divider {
     height: 1px;
-    background: #1A1A1A;
+    background: rgba(255, 255, 255, 0.04);
     margin: 30px 0;
     border: none;
 }
 
-/* ===== AI CARD ===== */
+/* ===== AI CARD (Glassmorphism) ===== */
 .ai-card {
-    background: #0A0A0A;
-    border: 1px solid #1A1A1A;
-    border-radius: 4px;
-    padding: 30px;
+    background: rgba(10, 10, 12, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: 6px !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.ai-card:hover {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-2px) !important;
 }
 .ai-header {
-    font-size: 12px;
-    color: #888888;
+    font-size: 11px;
+    color: #666666;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 20px;
 }
 .ai-val {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 36px;
+    font-size: 34px;
     color: #FFFFFF;
     margin-bottom: 10px;
 }
 .ai-stat {
-    font-size: 13px;
-    color: #888888;
+    font-size: 12.5px;
+    color: #666666;
     font-family: 'JetBrains Mono', monospace;
 }
 
@@ -227,9 +250,10 @@ p, label, span { color: #A0A0A0 !important; }
     text-align: left;
     padding: 20px 0;
     margin-top: 40px;
-    border-top: 1px solid #1A1A1A;
-    color: #666666;
-    font-size: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    color: #444444;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -529,27 +553,28 @@ def style_chart(fig):
         font=dict(family="Inter", color="#888888", size=11),
         xaxis=dict(
             showgrid=False,
-            linecolor='#1A1A1A',
-            tickfont=dict(color='#888888'),
+            linecolor='rgba(255,255,255,0.05)',
+            tickfont=dict(color='#666666', family="JetBrains Mono"),
             tickformat='%d/%m',
         ),
         yaxis=dict(
             showgrid=True,
-            gridcolor='#1A1A1A',
+            gridcolor='rgba(255,255,255,0.03)',
             zeroline=False,
-            tickfont=dict(color='#888888'),
+            linecolor='rgba(255,255,255,0.05)',
+            tickfont=dict(color='#666666', family="JetBrains Mono"),
         ),
         margin=dict(l=10, r=10, t=40, b=10),
         hovermode="x unified",
         hoverlabel=dict(
-            bgcolor="#0A0A0A",
-            bordercolor="#333333",
-            font=dict(color="#FFFFFF", family="JetBrains Mono"),
+            bgcolor="#0A0A0C",
+            bordercolor="rgba(255,255,255,0.08)",
+            font=dict(color="#FFFFFF", family="JetBrains Mono", size=11),
         ),
         legend=dict(
             orientation="h", y=1.05, x=1, xanchor="right",
             bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#A0A0A0'),
+            font=dict(color='#888888', family="Inter"),
         )
     )
     return fig
@@ -712,9 +737,17 @@ with tab1:
         chart_color = '#FFFFFF'
         
         st.markdown(f"#### {t('Hành Động Giá', 'Price Action')} ({unit_label})")
-        fig1 = px.line(df_full, y='View_Price', template="plotly_white")
-        fig1.update_traces(line_color=chart_color, line_width=1.5)
-        fig1.update_layout(yaxis_title="")
+        fig1 = go.Figure()
+        fig1.add_trace(go.Scatter(
+            x=df_full.index,
+            y=df_full['View_Price'],
+            mode='lines',
+            line=dict(color='#FFFFFF', width=2),
+            fill='tozeroy',
+            fillcolor='rgba(255, 255, 255, 0.03)',
+            name=t("Giá Vàng", "Gold Price")
+        ))
+        fig1.update_layout(yaxis_title="", template=None)
         st.plotly_chart(style_chart(fig1), width="stretch")
         
         render_chart_insight({
@@ -751,13 +784,42 @@ with tab1:
         }, "Macro Correlation")
 
         st.markdown(f"#### {t('Bản đồ Lợi Nhuận Hàng Tháng', 'Monthly Returns Heatmap')}")
-        df_month = df_full.copy()
-        df_month['Month'] = df_month.index.strftime('%m-%Y')
-        monthly_ret = df_month.resample('ME')['Daily_Return'].sum() * 100
-        fig4 = px.bar(x=monthly_ret.index.strftime('%Y-%m'), y=monthly_ret.values)
-        fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#FFFFFF', '#444444'))
-        fig4.update_layout(xaxis_title="", yaxis_title=t("Lợi Nhuận %", "Return %"))
-        st.plotly_chart(style_chart(fig4), width="stretch")
+        col_spread_1, col_spread_2 = st.columns(2)
+        
+        with col_spread_1:
+            df_month = df_full.copy()
+            df_month['Month'] = df_month.index.strftime('%m-%Y')
+            monthly_ret = df_month.resample('ME')['Daily_Return'].sum() * 100
+            fig4 = px.bar(x=monthly_ret.index.strftime('%Y-%m'), y=monthly_ret.values)
+            fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#FFFFFF', '#333333'))
+            fig4.update_layout(xaxis_title="", yaxis_title=t("Lợi Nhuận %", "Return %"), template=None)
+            st.plotly_chart(style_chart(fig4), width="stretch")
+            
+        with col_spread_2:
+            st.markdown(f"##### {t('Chênh Lệch Giá SJC vs Quốc Tế Quy Đổi', 'SJC Domestic Premium Spread')} ({t('Tr.VNĐ / Lượng', 'VND (Mil) / Tael')})", help=t("Mức chênh lệch thực tế giữa giá bán SJC trong nước so với giá vàng thế giới quy đổi.", "Actual spread between domestic SJC ask price and converted global base price."))
+            if not df_sjc.empty and not df_world.empty:
+                df_spread = df_sjc.join(df_world[['Gold_VND']], how='inner')
+                df_spread['Spread'] = (df_spread['SJC_Sell'] / 1e6) - df_spread['Gold_VND']
+                
+                fig_spread = go.Figure()
+                fig_spread.add_trace(go.Scatter(
+                    x=df_spread.index,
+                    y=df_spread['Spread'],
+                    mode='lines',
+                    line=dict(color='#10B981', width=1.8),
+                    fill='tozeroy',
+                    fillcolor='rgba(16, 185, 129, 0.03)',
+                    name=t("Mức Chênh Lệch", "Premium Spread")
+                ))
+                fig_spread.update_layout(yaxis_title="", template=None)
+                st.plotly_chart(style_chart(fig_spread), width="stretch")
+            else:
+                st.write(t("Dữ liệu SJC không đủ để vẽ tương quan chênh lệch.", "Insufficient SJC data for spread correlation."))
+        
+        render_chart_insight({
+            "Monthly_Returns_Pct": {k: float(v) for k, v in monthly_ret.to_dict().items()},
+            "SJC_Premium_Spread_Last_Value": float(df_spread['Spread'].iloc[-1]) if not df_sjc.empty and not df_world.empty else "N/A"
+        }, "Monthly Returns & SJC Premium Spread Analysis")
 
 
 with tab2:
@@ -995,10 +1057,23 @@ with tab4:
                         currency=currency_mode
                     )
                     
-                    report_html = report.replace('\\n', '<br>')
+                    report_html = report.replace('\n', '<br>')
                     st.markdown(f"""
-                    <div style="background: #111111; border: 1px solid #333; padding: 25px; border-radius: 4px; color: #DDDDDD; font-size: 14px; line-height: 1.6;">
-                        {report_html}
+                    <div style="background-color: #060608; border: 1px solid rgba(255,255,255,0.06); padding: 25px 30px; border-radius: 6px; box-shadow: 0 10px 45px rgba(0,0,0,0.65); font-family: 'JetBrains Mono', monospace; line-height: 1.7; position: relative;">
+                        <!-- Terminal header -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 8px; height: 8px; background-color: #FF5F56; border-radius: 50%;"></span>
+                                <span style="display: inline-block; width: 8px; height: 8px; background-color: #FFBD2E; border-radius: 50%;"></span>
+                                <span style="display: inline-block; width: 8px; height: 8px; background-color: #27C93F; border-radius: 50%;"></span>
+                                <span style="color: #666666; font-size: 10px; margin-left: 10px; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">QUANT INTELLIGENCE REPORT v3.1</span>
+                            </div>
+                            <span style="color: #10B981; font-size: 10px; font-weight: 500; font-family: 'JetBrains Mono', monospace;">● SYSTEM ACTIVE</span>
+                        </div>
+                        <!-- Terminal body -->
+                        <div style="color: #D4D4D8; font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.8;">
+                            {report_html}
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
 
