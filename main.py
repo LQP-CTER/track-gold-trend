@@ -363,7 +363,9 @@ def fetch_financial_data(start_date, end_date):
     except Exception as e:
         return pd.DataFrame(), str(e)
 
-SJC_CACHE_FILE = 'sjc_history_cache.csv'
+import os
+SJC_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sjc_history_cache.csv')
+
 
 def load_sjc_cache():
     import os
@@ -442,7 +444,10 @@ def fetch_sjc_data(start_date, end_date):
     if df_result.empty:
         try:
             url = "https://webgia.com/gia-vang/sjc/"
-            r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+            r = requests.get(url, headers=headers, timeout=5)
             soup = BeautifulSoup(r.text, 'html.parser')
             tds = soup.find_all('td')
             if len(tds) > 2:
