@@ -823,7 +823,7 @@ with tab1:
                 st.write(t("Dữ liệu SJC không đủ để vẽ tương quan chênh lệch.", "Insufficient SJC data for spread correlation."))
         
         render_chart_insight({
-            "Monthly_Returns_Pct": {k: float(v) for k, v in monthly_ret.to_dict().items()},
+            "Monthly_Returns_Pct": {k.strftime('%Y-%m') if hasattr(k, 'strftime') else str(k): float(v) for k, v in monthly_ret.to_dict().items()},
             "SJC_Premium_Spread_Last_Value": float(df_spread['Spread'].iloc[-1]) if (not df_sjc.empty and not df_world.empty and 'df_spread' in locals() and not df_spread.empty) else "N/A"
         }, "Monthly Returns & SJC Premium Spread Analysis")
 
@@ -998,7 +998,7 @@ with tab4:
                 "MAE": float(mae),
                 "Next_Day_Prediction": float(next_pred),
                 "Current_Price": float(df_today['View_Price'].iloc[-1]),
-                "Feature_Importances": imp.set_index('Feat')['Imp'].to_dict()
+                "Feature_Importances": {k: float(v) for k, v in imp.set_index('Feat')['Imp'].to_dict().items()}
             }, "AI Forecasting Model Weights")
 
             a1, a2 = st.columns(2)
