@@ -838,9 +838,9 @@ with tab1:
             x=df_full.index,
             y=df_full['View_Price'],
             mode='lines',
-            line=dict(color='#FFFFFF', width=2),
+            line=dict(color='#D97706', width=2),
             fill='tozeroy',
-            fillcolor='rgba(255, 255, 255, 0.03)',
+            fillcolor='rgba(217, 119, 6, 0.08)',
             name=t("Giá Vàng", "Gold Price")
         ))
         fig1.update_layout(yaxis_title="", template=None)
@@ -887,7 +887,7 @@ with tab1:
             df_month['Month'] = df_month.index.strftime('%m-%Y')
             monthly_ret = df_month.resample('ME')['Daily_Return'].sum() * 100
             fig4 = px.bar(x=monthly_ret.index.strftime('%Y-%m'), y=monthly_ret.values)
-            fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#FFFFFF', '#333333'))
+            fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#10B981', '#EF4444'))
             fig4.update_layout(xaxis_title="", yaxis_title=t("Lợi Nhuận %", "Return %"), template=None)
             st.plotly_chart(style_chart(fig4), width="stretch")
             
