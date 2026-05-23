@@ -13,6 +13,8 @@ from bs4 import BeautifulSoup
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score
+from narrative import generate_ai_insight
+
 
 # Bảo mật API Key: Lấy từ Streamlit Secrets hoặc Biến môi trường
 try:
@@ -249,6 +251,24 @@ def t(vi_text, en_text):
     if st.session_state.get('lang', 'Tiếng Việt') == 'English':
         return en_text
     return vi_text
+
+
+def render_chart_insight(data_dict, chart_name):
+    """Helper to generate and display AI insight per chart (Dark Theme compatible)"""
+    lang_code = 'VN' if st.session_state.get('lang', 'Tiếng Việt') == 'Tiếng Việt' else 'EN'
+    spinner_text = "Phân tích AI..." if lang_code == 'VN' else "AI Analyzing..."
+    with st.spinner(spinner_text):
+        insight = generate_ai_insight(
+            json.dumps(data_dict, ensure_ascii=False),
+            dashboard_section=chart_name,
+            lang=lang_code
+        )
+    st.markdown(f"""
+    <div style="background-color: #0A0A0A; border-left: 2px solid #FFFFFF; padding: 12px 16px; margin-top: -15px; margin-bottom: 25px; border-top: 1px solid #1A1A1A; border-right: 1px solid #1A1A1A; border-bottom: 1px solid #1A1A1A; border-radius: 0 4px 4px 0;">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">AI Market Insight</span>
+        <span style="font-family: 'Inter', sans-serif; font-size: 12px; color: #E5E5E5; line-height: 1.6; display: block;">{insight}</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 def get_groq_analysis(current_price, predicted_price, rsi, macd, sma20, sma50, currency):
@@ -691,6 +711,14 @@ with tab1:
         fig1.update_traces(line_color=chart_color, line_width=1.5)
         fig1.update_layout(yaxis_title="")
         st.plotly_chart(style_chart(fig1), width="stretch")
+        
+        render_chart_insight({
+            "Start_Price": float(df_full['View_Price'].iloc[0]),
+            "End_Price": float(df_full['View_Price'].iloc[-1]),
+            "Min_Price": float(df_full['View_Price'].min()),
+            "Max_Price": float(df_full['View_Price'].max()),
+            "Timeframe_Days": len(df_full)
+        }, "Price Action")
 
         col_chart_1, col_chart_2 = st.columns(2)
         
@@ -709,6 +737,13 @@ with tab1:
             fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], name=t("Vàng", "Gold"), line=dict(color='#FFFFFF', width=1.5)), secondary_y=False)
             fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['USDVND'], name="USD/VND", line=dict(color="#555555", width=1.5)), secondary_y=True)
             st.plotly_chart(style_chart(fig3), width="stretch")
+            
+        render_chart_insight({
+            "Gold_Spot_Price": float(df_full['View_Price'].iloc[-1]),
+            "USD_VND_Rate": float(df_full['USDVND'].iloc[-1]),
+            "Gold_in_VND_Per_Tael": float(df_full['Gold_VND'].iloc[-1]),
+            "Correlation_Gold_USDVND": float(df_full['View_Price'].corr(df_full['USDVND']))
+        }, "Macro Correlation")
 
         st.markdown(f"#### {t('Bản đồ Lợi Nhuận Hàng Tháng', 'Monthly Returns Heatmap')}")
         df_month = df_full.copy()
@@ -748,6 +783,16 @@ with tab2:
             fig_cum.update_traces(line_color="#FFFFFF", line_width=1.5)
             fig_cum.update_layout(yaxis_title=t("Hệ số Nhân", "Multiplier"))
             st.plotly_chart(style_chart(fig_cum), width="stretch")
+            
+            render_chart_insight({
+                "Initial_Investment": invest,
+                "Entry_Date": str(buy_date),
+                "Buy_Price": float(buy_p),
+                "Current_Price": float(curr_p),
+                "PL_Val": float(profit),
+                "PL_Pct": float((profit/invest)*100),
+                "Cumulative_Return_Multiplier": float(df_full['Cumulative_Return'].iloc[-1])
+            }, "Scenario & Cumulative Performance")
 
         r1, r2 = st.columns(2)
         with r1:
@@ -762,6 +807,13 @@ with tab2:
             fig_vol = px.line(df_full, y='Vol_30', template="plotly_white")
             fig_vol.update_traces(line_color="#FFFFFF", line_width=1.5)
             st.plotly_chart(style_chart(fig_vol), width="stretch")
+            
+        render_chart_insight({
+            "Max_Drawdown_Pct": float(df_full['Drawdown'].min() * 100),
+            "Current_Drawdown_Pct": float(df_full['Drawdown'].iloc[-1] * 100),
+            "Current_30Day_Volatility": float(df_full['Vol_30'].iloc[-1] * 100),
+            "Max_30Day_Volatility": float(df_full['Vol_30'].max() * 100)
+        }, "Drawdown & Volatility Risk Analysis")
 
 
 with tab3:
@@ -786,6 +838,14 @@ with tab3:
             fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_50'], line=dict(color='#666666', width=1), name='SMA 50'))
             fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#333333', width=1), opacity=0.5, name=t('Giá', 'Price')))
             st.plotly_chart(style_chart(fig_sma), width="stretch")
+            
+        render_chart_insight({
+            "Current_Price": float(df_full['View_Price'].iloc[-1]),
+            "SMA_20": float(df_full['SMA_20'].iloc[-1]),
+            "SMA_50": float(df_full['SMA_50'].iloc[-1]),
+            "Bollinger_Upper": float(df_full['BB_Upper'].iloc[-1]),
+            "Bollinger_Lower": float(df_full['BB_Lower'].iloc[-1])
+        }, "Moving Averages & Bollinger Bands")
 
         t3, t4 = st.columns(2)
         
@@ -807,6 +867,13 @@ with tab3:
             fig_macd.add_trace(go.Bar(x=df_full.index, y=df_full['MACD_Hist'], marker_color=colors, name='Hist'), row=2, col=1)
             fig_macd.update_layout(showlegend=False)
             st.plotly_chart(style_chart(fig_macd), width="stretch")
+            
+        render_chart_insight({
+            "RSI_14": float(df_full['RSI'].iloc[-1]),
+            "MACD_Val": float(df_full['MACD'].iloc[-1]),
+            "MACD_Signal": float(df_full['MACD_Signal'].iloc[-1]),
+            "MACD_Hist": float(df_full['MACD_Hist'].iloc[-1])
+        }, "RSI & MACD Momentum Indicators")
 
 
 with tab4:
@@ -852,6 +919,14 @@ with tab4:
                 fig_imp.update_traces(marker_color='#FFFFFF')
                 fig_imp.update_layout(xaxis_title=t("Trọng Số Quan Trọng", "Importance Weight"), yaxis_title="")
                 st.plotly_chart(style_chart(fig_imp), width="stretch")
+                
+            render_chart_insight({
+                "Model_Type": "Ridge Regression",
+                "MAE": float(mae),
+                "Next_Day_Prediction": float(next_pred),
+                "Current_Price": float(df_today['View_Price'].iloc[-1]),
+                "Feature_Importances": imp.set_index('Feat')['Imp'].to_dict()
+            }, "AI Forecasting Model Weights")
 
             a1, a2 = st.columns(2)
             
@@ -888,6 +963,12 @@ with tab4:
                     st.plotly_chart(style_chart(fig_future), width="stretch")
                 else:
                     st.write(t("Dữ liệu không đủ để dự báo đa bước.", "Insufficient data for multi-step forecast."))
+                    
+            render_chart_insight({
+                "Backtest_Actual_Last_5": [float(x) for x in y_test.iloc[-5:].tolist()] if len(y_test) >= 5 else [float(x) for x in y_test.tolist()],
+                "Backtest_Pred_Last_5": [float(x) for x in y_pred[-5:].tolist()] if len(y_pred) >= 5 else [float(x) for x in y_pred.tolist()],
+                "Future_5Day_Forecast": [float(x) for x in future_preds]
+            }, "Quantitative Backtest & 5-Day Forecast Trend")
                 
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             st.markdown(f"#### {t('Báo Cáo Phân Tích Bằng AI', 'Generative AI Market Report')}")
