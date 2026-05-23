@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS tùy chỉnh: Tối giản, phong cách doanh nghiệp Fintech/Enterprise cao cấp (Glassmorphism & OLED Dark)
+# CSS tùy chỉnh: Tối giản, phong cách doanh nghiệp Fintech/Enterprise cao cấp (Light Glassmorphism & Cool Slate)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -37,32 +37,32 @@ st.markdown("""
 html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
 .stApp {
-    background-color: #030303 !important;
+    background-color: #F8F9FA !important;
 }
 
 /* ===== SIDEBAR ===== */
 [data-testid="stSidebar"] {
-    background: #060608 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
+    background: #F1F3F5 !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 [data-testid="stSidebar"] > div { padding-top: 0 !important; }
 
 .brand-header {
     padding: 30px 20px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
 }
 .brand-header h1 {
     font-family: 'Outfit', sans-serif;
     font-size: 25px;
-    font-weight: 500;
-    color: #FFFFFF;
+    font-weight: 600;
+    color: #0F172A;
     margin: 0;
-    letter-spacing: 0.5px;
+    letter-spacing: -0.3px;
 }
 .brand-header p {
     font-size: 10px;
-    color: #666666;
+    color: #888888;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     margin: 4px 0 0;
@@ -70,7 +70,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
 .sidebar-label {
     font-size: 10px;
-    color: #555555;
+    color: #94A3B8;
     text-transform: uppercase;
     letter-spacing: 1px;
     display: block;
@@ -80,55 +80,55 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
     border-radius: 0 !important;
     padding-bottom: 20px !important;
     margin-bottom: 20px !important;
 }
 
 .date-text {
-    color: #888888;
+    color: #475569;
     font-size: 12px;
     font-family: 'JetBrains Mono', monospace;
     margin-top: 8px;
 }
 
 [data-testid="stSidebar"] div.stButton > button {
-    background: #FFFFFF !important;
-    color: #000000 !important;
-    border: 1px solid #FFFFFF !important;
+    background: #0F172A !important;
+    color: #FFFFFF !important;
+    border: 1px solid #0F172A !important;
     border-radius: 3px !important;
     font-weight: 500 !important;
     font-size: 12px !important;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 [data-testid="stSidebar"] div.stButton > button:hover {
-    background: #E5E5E5 !important;
-    border-color: #E5E5E5 !important;
+    background: #1E293B !important;
+    border-color: #1E293B !important;
     transform: translateY(-1px) !important;
 }
 
 /* ===== MAIN TEXT ===== */
 .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 { 
     font-family: 'Outfit', sans-serif !important;
-    color: #FFFFFF !important; 
-    font-weight: 500 !important;
-    letter-spacing: -0.3px !important;
+    color: #0F172A !important; 
+    font-weight: 600 !important;
+    letter-spacing: -0.5px !important;
 }
-p, label, span { color: #888888 !important; }
+p, label, span { color: #475569 !important; }
 
 /* ===== TABS ===== */
 .stTabs [data-baseweb="tab-list"] {
     gap: 0;
     background: transparent;
     padding: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 .stTabs [data-baseweb="tab"] {
     height: 48px;
     background: transparent;
     border-radius: 0;
-    color: #555555;
+    color: #64748B;
     font-weight: 500;
     font-size: 14px;
     border: none;
@@ -137,52 +137,53 @@ p, label, span { color: #888888 !important; }
     padding: 0 4px;
     transition: all 0.2s ease !important;
 }
-.stTabs [data-baseweb="tab"]:hover { color: #FFFFFF; }
+.stTabs [data-baseweb="tab"]:hover { color: #0F172A; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] {
-    color: #FFFFFF;
-    border-bottom: 2px solid #FFFFFF;
+    color: #0F172A;
+    border-bottom: 2px solid #0F172A;
 }
 
 /* ===== HERO HEADER ===== */
 .hero-header {
     padding: 10px 0 25px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     margin-bottom: 30px;
 }
 .hero-title {
     font-family: 'Outfit', sans-serif;
     font-size: 30px;
-    font-weight: 500;
-    color: #FFFFFF;
+    font-weight: 600;
+    color: #0F172A;
     margin: 0 0 6px;
     letter-spacing: -0.5px;
 }
 .hero-subtitle { 
     font-size: 12px; 
-    color: #666666; 
+    color: #64748B; 
     margin: 0;
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* ===== METRIC CARDS (Glassmorphism) ===== */
+/* ===== METRIC CARDS (Light Glassmorphism) ===== */
 .metric-container {
     padding: 22px 24px;
-    background: rgba(10, 10, 12, 0.75) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
     border-radius: 6px !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 0 2px 12px rgba(9, 30, 66, 0.03) !important;
     height: 100%;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .metric-container:hover {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 30px rgba(9, 30, 66, 0.08) !important;
     transform: translateY(-2px) !important;
 }
 .metric-label {
     font-size: 11px;
-    color: #666666;
+    color: #64748B;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 12px;
@@ -191,7 +192,7 @@ p, label, span { color: #888888 !important; }
     font-family: 'JetBrains Mono', monospace;
     font-size: 26px;
     font-weight: 500;
-    color: #FFFFFF;
+    color: #0F172A;
     margin-bottom: 8px;
     line-height: 1;
 }
@@ -199,36 +200,37 @@ p, label, span { color: #888888 !important; }
     font-size: 12.5px;
     font-family: 'JetBrains Mono', monospace;
 }
-.text-up { color: #10B981; }      /* Emerald green */
-.text-down { color: #EF4444; }    /* Rose red */
-.text-neutral { color: #555555; }
+.text-up { color: #059669; }      /* Emerald green */
+.text-down { color: #DC2626; }    /* Rose red */
+.text-neutral { color: #64748B; }
 
 /* ===== SECTION DIVIDER ===== */
 .section-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.05);
     margin: 30px 0;
     border: none;
 }
 
-/* ===== AI CARD (Glassmorphism) ===== */
+/* ===== AI CARD (Light Glassmorphism) ===== */
 .ai-card {
-    background: rgba(10, 10, 12, 0.75) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
     border-radius: 6px !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 0 2px 12px rgba(9, 30, 66, 0.03) !important;
     padding: 24px;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .ai-card:hover {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 30px rgba(9, 30, 66, 0.08) !important;
     transform: translateY(-2px) !important;
 }
 .ai-header {
     font-size: 11px;
-    color: #666666;
+    color: #64748B;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 20px;
@@ -236,12 +238,12 @@ p, label, span { color: #888888 !important; }
 .ai-val {
     font-family: 'JetBrains Mono', monospace;
     font-size: 34px;
-    color: #FFFFFF;
+    color: #0F172A;
     margin-bottom: 10px;
 }
 .ai-stat {
     font-size: 12.5px;
-    color: #666666;
+    color: #64748B;
     font-family: 'JetBrains Mono', monospace;
 }
 
@@ -250,8 +252,8 @@ p, label, span { color: #888888 !important; }
     text-align: left;
     padding: 20px 0;
     margin-top: 40px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    color: #444444;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    color: #94A3B8;
     font-size: 11px;
     font-family: 'JetBrains Mono', monospace;
 }
@@ -550,31 +552,31 @@ def style_chart(fig):
     fig.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Inter", color="#888888", size=11),
+        font=dict(family="Inter", color="#64748B", size=11),
         xaxis=dict(
             showgrid=False,
-            linecolor='rgba(255,255,255,0.05)',
-            tickfont=dict(color='#666666', family="JetBrains Mono"),
+            linecolor='rgba(0,0,0,0.06)',
+            tickfont=dict(color='#64748B', family="JetBrains Mono"),
             tickformat='%d/%m',
         ),
         yaxis=dict(
             showgrid=True,
-            gridcolor='rgba(255,255,255,0.03)',
+            gridcolor='rgba(0,0,0,0.04)',
             zeroline=False,
-            linecolor='rgba(255,255,255,0.05)',
-            tickfont=dict(color='#666666', family="JetBrains Mono"),
+            linecolor='rgba(0,0,0,0.06)',
+            tickfont=dict(color='#64748B', family="JetBrains Mono"),
         ),
         margin=dict(l=10, r=10, t=40, b=10),
         hovermode="x unified",
         hoverlabel=dict(
-            bgcolor="#0A0A0C",
-            bordercolor="rgba(255,255,255,0.08)",
-            font=dict(color="#FFFFFF", family="JetBrains Mono", size=11),
+            bgcolor="#FFFFFF",
+            bordercolor="rgba(0,0,0,0.08)",
+            font=dict(color="#0F172A", family="JetBrains Mono", size=11),
         ),
         legend=dict(
             orientation="h", y=1.05, x=1, xanchor="right",
             bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#888888', family="Inter"),
+            font=dict(color='#475569', family="Inter"),
         )
     )
     return fig
@@ -765,15 +767,15 @@ with tab1:
             fig2 = go.Figure(data=[go.Candlestick(x=df_full.index,
                             open=df_full['View_Open'], high=df_full['View_High'],
                             low=df_full['View_Low'], close=df_full['View_Price'],
-                            increasing_line_color='#FFFFFF', decreasing_line_color='#666666')])
-            fig2.update_layout(xaxis_rangeslider_visible=False, template="plotly_white")
+                            increasing_line_color='#10B981', decreasing_line_color='#EF4444')])
+            fig2.update_layout(xaxis_rangeslider_visible=False, template=None)
             st.plotly_chart(style_chart(fig2), width="stretch")
 
         with col_chart_2:
             st.markdown(f"#### {t('Tương Quan Vĩ Mô', 'Macro Correlation')}")
             fig3 = make_subplots(specs=[[{"secondary_y": True}]])
-            fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], name=t("Vàng", "Gold"), line=dict(color='#FFFFFF', width=1.5)), secondary_y=False)
-            fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['USDVND'], name="USD/VND", line=dict(color="#555555", width=1.5)), secondary_y=True)
+            fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], name=t("Vàng", "Gold"), line=dict(color='#D97706', width=1.8)), secondary_y=False)
+            fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['USDVND'], name="USD/VND", line=dict(color="#0F172A", width=1.8)), secondary_y=True)
             st.plotly_chart(style_chart(fig3), width="stretch")
             
         render_chart_insight({
@@ -851,9 +853,9 @@ with tab2:
 
         with c2:
             st.markdown(f"##### {t('Lợi Nhuận Tích Lũy', 'Cumulative Return')}")
-            fig_cum = px.line(df_full, y='Cumulative_Return', template="plotly_white")
-            fig_cum.add_hline(y=1, line_dash="dash", line_color="#333333")
-            fig_cum.update_traces(line_color="#FFFFFF", line_width=1.5)
+            fig_cum = px.line(df_full, y='Cumulative_Return', template=None)
+            fig_cum.add_hline(y=1, line_dash="dash", line_color="rgba(0,0,0,0.15)")
+            fig_cum.update_traces(line_color="#0F172A", line_width=1.8)
             fig_cum.update_layout(yaxis_title=t("Hệ số Nhân", "Multiplier"))
             st.plotly_chart(style_chart(fig_cum), width="stretch")
             
@@ -870,15 +872,15 @@ with tab2:
         r1, r2 = st.columns(2)
         with r1:
             st.markdown(f"##### {t('Mức Sụt Giảm Tối Đa', 'Maximum Drawdown')}")
-            fig_dd = px.line(df_full, y='Drawdown', template="plotly_white")
-            fig_dd.update_traces(line_color="#888888", fill='tozeroy', fillcolor="rgba(136,136,136,0.1)")
+            fig_dd = px.line(df_full, y='Drawdown', template=None)
+            fig_dd.update_traces(line_color="#EF4444", fill='tozeroy', fillcolor="rgba(239, 68, 68, 0.03)")
             st.plotly_chart(style_chart(fig_dd), width="stretch")
         
         with r2:
             st.markdown(f"##### {t('Độ Biến Động 30 Ngày', '30-Day Volatility')}")
             df_full['Vol_30'] = df_full['Daily_Return'].rolling(30).std()
-            fig_vol = px.line(df_full, y='Vol_30', template="plotly_white")
-            fig_vol.update_traces(line_color="#FFFFFF", line_width=1.5)
+            fig_vol = px.line(df_full, y='Vol_30', template=None)
+            fig_vol.update_traces(line_color="#0F172A", line_width=1.8)
             st.plotly_chart(style_chart(fig_vol), width="stretch")
             
         render_chart_insight({
@@ -898,18 +900,18 @@ with tab3:
         with t1:
             st.markdown(f"##### {t('Dải Bollinger (20, 2)', 'Bollinger Bands (20, 2)')}")
             fig_bb = go.Figure()
-            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Upper'], line=dict(color='#333333', width=1), name=t('Cận trên', 'Upper')))
-            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Lower'], line=dict(color='#333333', width=1), fill='tonexty', name=t('Cận dưới', 'Lower')))
-            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#FFFFFF', width=1.5), name=t('Giá', 'Price')))
+            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Upper'], line=dict(color='rgba(0,0,0,0.1)', width=1), name=t('Cận trên', 'Upper')))
+            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Lower'], line=dict(color='rgba(0,0,0,0.1)', width=1), fill='tonexty', fillcolor='rgba(0,0,0,0.01)', name=t('Cận dưới', 'Lower')))
+            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#D97706', width=1.8), name=t('Giá', 'Price')))
             fig_bb.update_layout(showlegend=False)
             st.plotly_chart(style_chart(fig_bb), width="stretch")
 
         with t2:
             st.markdown(f"##### {t('Đường Trung Bình (20 & 50)', 'Moving Averages (20 & 50)')}")
             fig_sma = go.Figure()
-            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_20'], line=dict(color='#FFFFFF', width=1), name='SMA 20'))
-            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_50'], line=dict(color='#666666', width=1), name='SMA 50'))
-            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#333333', width=1), opacity=0.5, name=t('Giá', 'Price')))
+            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_20'], line=dict(color='#3B82F6', width=1.2), name='SMA 20'))
+            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_50'], line=dict(color='#EF4444', width=1.2), name='SMA 50'))
+            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#94A3B8', width=1), opacity=0.4, name=t('Giá', 'Price')))
             st.plotly_chart(style_chart(fig_sma), width="stretch")
             
         render_chart_insight({
@@ -925,18 +927,18 @@ with tab3:
         with t3:
             st.markdown(f"##### {t('Chỉ Số Sức Mạnh Tương Đối (RSI 14)', 'Relative Strength Index (14)')}")
             fig_rsi = px.line(df_full, y='RSI')
-            fig_rsi.add_hline(y=70, line_dash="dash", line_color="#555555")
-            fig_rsi.add_hline(y=30, line_dash="dash", line_color="#555555")
-            fig_rsi.update_traces(line_color='#FFFFFF', line_width=1.5)
+            fig_rsi.add_hline(y=70, line_dash="dash", line_color="rgba(0,0,0,0.15)")
+            fig_rsi.add_hline(y=30, line_dash="dash", line_color="rgba(0,0,0,0.15)")
+            fig_rsi.update_traces(line_color='#0F172A', line_width=1.8)
             fig_rsi.update_layout(yaxis_range=[0, 100], yaxis_title="")
             st.plotly_chart(style_chart(fig_rsi), width="stretch")
 
         with t4:
             st.markdown(f"##### {t('Đường Xu Hướng MACD', 'MACD (12, 26, 9)')}")
             fig_macd = make_subplots(rows=2, cols=1, row_heights=[0.7, 0.3], vertical_spacing=0.05)
-            fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD'], line=dict(color='#FFFFFF', width=1.5), name='MACD'), row=1, col=1)
-            fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD_Signal'], line=dict(color='#666666', width=1.5), name='Signal'), row=1, col=1)
-            colors = np.where(df_full['MACD_Hist'] < 0, '#333333', '#FFFFFF')
+            fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD'], line=dict(color='#0F172A', width=1.8), name='MACD'), row=1, col=1)
+            fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD_Signal'], line=dict(color='#94A3B8', width=1.8), name='Signal'), row=1, col=1)
+            colors = np.where(df_full['MACD_Hist'] < 0, '#EF4444', '#10B981')
             fig_macd.add_trace(go.Bar(x=df_full.index, y=df_full['MACD_Hist'], marker_color=colors, name='Hist'), row=2, col=1)
             fig_macd.update_layout(showlegend=False)
             st.plotly_chart(style_chart(fig_macd), width="stretch")
@@ -989,7 +991,7 @@ with tab4:
             with c_ai2:
                 imp = pd.DataFrame({'Feat': feats, 'Imp': np.abs(rf.coef_)}).sort_values('Imp')
                 fig_imp = px.bar(imp, x='Imp', y='Feat', orientation='h')
-                fig_imp.update_traces(marker_color='#FFFFFF')
+                fig_imp.update_traces(marker_color='#0F172A')
                 fig_imp.update_layout(xaxis_title=t("Trọng Số Quan Trọng", "Importance Weight"), yaxis_title="")
                 st.plotly_chart(style_chart(fig_imp), width="stretch")
                 
@@ -1007,8 +1009,8 @@ with tab4:
                 st.markdown(f"##### {t('Kết Quả Kiểm Thử (Backtest)', 'Backtest Results')}")
                 df_res = pd.DataFrame({'Actual': y_test, 'Pred': y_pred}, index=y_test.index)
                 fig_back = go.Figure()
-                fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Actual'], name=t('Thực tế', 'Actual'), line=dict(color='#444444')))
-                fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Pred'], name=t('Mô hình', 'Model'), line=dict(color='#FFFFFF', dash='dot')))
+                fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Actual'], name=t('Thực tế', 'Actual'), line=dict(color='#94A3B8')))
+                fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Pred'], name=t('Mô hình', 'Model'), line=dict(color='#0F172A', dash='dot')))
                 st.plotly_chart(style_chart(fig_back), width="stretch")
 
             with a2:
@@ -1031,8 +1033,8 @@ with tab4:
                     
                     past_df = df_full.iloc[-20:]
                     fig_future = go.Figure()
-                    fig_future.add_trace(go.Scatter(x=past_df.index, y=past_df['View_Price'], name=t('Lịch sử', 'Historical'), line=dict(color='#444444', width=2)))
-                    fig_future.add_trace(go.Scatter(x=plot_dates, y=plot_vals, name=t('Dự báo', 'Forecast'), line=dict(color='#FFFFFF', dash='dot', width=2)))
+                    fig_future.add_trace(go.Scatter(x=past_df.index, y=past_df['View_Price'], name=t('Lịch sử', 'Historical'), line=dict(color='#94A3B8', width=2)))
+                    fig_future.add_trace(go.Scatter(x=plot_dates, y=plot_vals, name=t('Dự báo', 'Forecast'), line=dict(color='#D97706', dash='dot', width=2)))
                     st.plotly_chart(style_chart(fig_future), width="stretch")
                 else:
                     st.write(t("Dữ liệu không đủ để dự báo đa bước.", "Insufficient data for multi-step forecast."))
