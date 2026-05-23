@@ -739,7 +739,7 @@ with st.sidebar:
     with st.container():
         st.markdown(f'<span class="sidebar-label">{t("DỮ LIỆU LIVE", "REAL-TIME DATA")}</span>', unsafe_allow_html=True)
         live_price = None
-        if st.button(t("CẬP NHẬT GIÁ USD LIVE", "FETCH LIVE USD PRICE"), width="stretch"):
+        if st.button(t("CẬP NHẬT GIÁ USD LIVE", "FETCH LIVE USD PRICE"), use_container_width=True):
             with st.spinner(t("Đang kết nối...", "Connecting...")):
                 live_price = get_live_world_price()
                 if live_price: 
@@ -844,7 +844,7 @@ with tab1:
             name=t("Giá Vàng", "Gold Price")
         ))
         fig1.update_layout(yaxis_title="", template=None)
-        st.plotly_chart(style_chart(fig1), width="stretch")
+        st.plotly_chart(style_chart(fig1), use_container_width=True, theme=None)
         
         render_chart_insight({
             "Start_Price": float(df_full['View_Price'].iloc[0]),
@@ -863,14 +863,14 @@ with tab1:
                             low=df_full['View_Low'], close=df_full['View_Price'],
                             increasing_line_color='#10B981', decreasing_line_color='#EF4444')])
             fig2.update_layout(xaxis_rangeslider_visible=False, template=None)
-            st.plotly_chart(style_chart(fig2), width="stretch")
+            st.plotly_chart(style_chart(fig2), use_container_width=True, theme=None)
 
         with col_chart_2:
             st.markdown(f"#### {t('Tương Quan Vĩ Mô', 'Macro Correlation')}")
             fig3 = make_subplots(specs=[[{"secondary_y": True}]])
             fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], name=t("Vàng", "Gold"), line=dict(color='#D97706', width=1.8)), secondary_y=False)
             fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['USDVND'], name="USD/VND", line=dict(color="#0F172A", width=1.8)), secondary_y=True)
-            st.plotly_chart(style_chart(fig3), width="stretch")
+            st.plotly_chart(style_chart(fig3), use_container_width=True, theme=None)
             
         render_chart_insight({
             "Gold_Spot_Price": float(df_full['View_Price'].iloc[-1]),
@@ -889,7 +889,7 @@ with tab1:
             fig4 = px.bar(x=monthly_ret.index.strftime('%Y-%m'), y=monthly_ret.values)
             fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#10B981', '#EF4444'))
             fig4.update_layout(xaxis_title="", yaxis_title=t("Lợi Nhuận %", "Return %"), template=None)
-            st.plotly_chart(style_chart(fig4), width="stretch")
+            st.plotly_chart(style_chart(fig4), use_container_width=True, theme=None)
             
         with col_spread_2:
             st.markdown(f"##### {t('Chênh Lệch Giá SJC vs Quốc Tế Quy Đổi', 'SJC Domestic Premium Spread')} ({t('Tr.VNĐ / Lượng', 'VND (Mil) / Tael')})", help=t("Mức chênh lệch thực tế giữa giá bán SJC trong nước so với giá vàng thế giới quy đổi.", "Actual spread between domestic SJC ask price and converted global base price."))
@@ -912,7 +912,7 @@ with tab1:
                         name=t("Mức Chênh Lệch", "Premium Spread")
                     ))
                     fig_spread.update_layout(yaxis_title="", template=None)
-                    st.plotly_chart(style_chart(fig_spread), width="stretch")
+                    st.plotly_chart(style_chart(fig_spread), use_container_width=True, theme=None)
                 else:
                     st.write(t("Không tìm thấy ngày giao dịch khớp giữa SJC và Quốc tế.", "No matching transaction dates found between SJC and Global price."))
             else:
@@ -951,7 +951,7 @@ with tab2:
             fig_cum.add_hline(y=1, line_dash="dash", line_color="rgba(0,0,0,0.15)")
             fig_cum.update_traces(line_color="#0F172A", line_width=1.8)
             fig_cum.update_layout(yaxis_title=t("Hệ số Nhân", "Multiplier"))
-            st.plotly_chart(style_chart(fig_cum), width="stretch")
+            st.plotly_chart(style_chart(fig_cum), use_container_width=True, theme=None)
             
             render_chart_insight({
                 "Initial_Investment": invest,
@@ -968,14 +968,14 @@ with tab2:
             st.markdown(f"##### {t('Mức Sụt Giảm Tối Đa', 'Maximum Drawdown')}")
             fig_dd = px.line(df_full, y='Drawdown', template=None)
             fig_dd.update_traces(line_color="#EF4444", fill='tozeroy', fillcolor="rgba(239, 68, 68, 0.03)")
-            st.plotly_chart(style_chart(fig_dd), width="stretch")
+            st.plotly_chart(style_chart(fig_dd), use_container_width=True, theme=None)
         
         with r2:
             st.markdown(f"##### {t('Độ Biến Động 30 Ngày', '30-Day Volatility')}")
             df_full['Vol_30'] = df_full['Daily_Return'].rolling(30).std()
             fig_vol = px.line(df_full, y='Vol_30', template=None)
             fig_vol.update_traces(line_color="#0F172A", line_width=1.8)
-            st.plotly_chart(style_chart(fig_vol), width="stretch")
+            st.plotly_chart(style_chart(fig_vol), use_container_width=True, theme=None)
             
         render_chart_insight({
             "Max_Drawdown_Pct": float(df_full['Drawdown'].min() * 100),
@@ -998,7 +998,7 @@ with tab3:
             fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Lower'], line=dict(color='rgba(0,0,0,0.1)', width=1), fill='tonexty', fillcolor='rgba(0,0,0,0.01)', name=t('Cận dưới', 'Lower')))
             fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#D97706', width=1.8), name=t('Giá', 'Price')))
             fig_bb.update_layout(showlegend=False)
-            st.plotly_chart(style_chart(fig_bb), width="stretch")
+            st.plotly_chart(style_chart(fig_bb), use_container_width=True, theme=None)
 
         with t2:
             st.markdown(f"##### {t('Đường Trung Bình (20 & 50)', 'Moving Averages (20 & 50)')}")
@@ -1006,7 +1006,7 @@ with tab3:
             fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_20'], line=dict(color='#3B82F6', width=1.2), name='SMA 20'))
             fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_50'], line=dict(color='#EF4444', width=1.2), name='SMA 50'))
             fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#94A3B8', width=1), opacity=0.4, name=t('Giá', 'Price')))
-            st.plotly_chart(style_chart(fig_sma), width="stretch")
+            st.plotly_chart(style_chart(fig_sma), use_container_width=True, theme=None)
             
         render_chart_insight({
             "Current_Price": float(df_full['View_Price'].iloc[-1]),
@@ -1025,7 +1025,7 @@ with tab3:
             fig_rsi.add_hline(y=30, line_dash="dash", line_color="rgba(0,0,0,0.15)")
             fig_rsi.update_traces(line_color='#0F172A', line_width=1.8)
             fig_rsi.update_layout(yaxis_range=[0, 100], yaxis_title="")
-            st.plotly_chart(style_chart(fig_rsi), width="stretch")
+            st.plotly_chart(style_chart(fig_rsi), use_container_width=True, theme=None)
 
         with t4:
             st.markdown(f"##### {t('Đường Xu Hướng MACD', 'MACD (12, 26, 9)')}")
@@ -1035,7 +1035,7 @@ with tab3:
             colors = np.where(df_full['MACD_Hist'] < 0, '#EF4444', '#10B981')
             fig_macd.add_trace(go.Bar(x=df_full.index, y=df_full['MACD_Hist'], marker_color=colors, name='Hist'), row=2, col=1)
             fig_macd.update_layout(showlegend=False)
-            st.plotly_chart(style_chart(fig_macd), width="stretch")
+            st.plotly_chart(style_chart(fig_macd), use_container_width=True, theme=None)
             
         render_chart_insight({
             "RSI_14": float(df_full['RSI'].iloc[-1]),
@@ -1087,7 +1087,7 @@ with tab4:
                 fig_imp = px.bar(imp, x='Imp', y='Feat', orientation='h')
                 fig_imp.update_traces(marker_color='#0F172A')
                 fig_imp.update_layout(xaxis_title=t("Trọng Số Quan Trọng", "Importance Weight"), yaxis_title="")
-                st.plotly_chart(style_chart(fig_imp), width="stretch")
+                st.plotly_chart(style_chart(fig_imp), use_container_width=True, theme=None)
                 
             render_chart_insight({
                 "Model_Type": "Ridge Regression",
@@ -1105,7 +1105,7 @@ with tab4:
                 fig_back = go.Figure()
                 fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Actual'], name=t('Thực tế', 'Actual'), line=dict(color='#94A3B8')))
                 fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Pred'], name=t('Mô hình', 'Model'), line=dict(color='#0F172A', dash='dot')))
-                st.plotly_chart(style_chart(fig_back), width="stretch")
+                st.plotly_chart(style_chart(fig_back), use_container_width=True, theme=None)
 
             with a2:
                 st.markdown(f"##### {t('Dự Báo 5 Ngày Tới', '5-Day Future Forecast')}")
@@ -1129,7 +1129,7 @@ with tab4:
                     fig_future = go.Figure()
                     fig_future.add_trace(go.Scatter(x=past_df.index, y=past_df['View_Price'], name=t('Lịch sử', 'Historical'), line=dict(color='#94A3B8', width=2)))
                     fig_future.add_trace(go.Scatter(x=plot_dates, y=plot_vals, name=t('Dự báo', 'Forecast'), line=dict(color='#D97706', dash='dot', width=2)))
-                    st.plotly_chart(style_chart(fig_future), width="stretch")
+                    st.plotly_chart(style_chart(fig_future), use_container_width=True, theme=None)
                 else:
                     st.write(t("Dữ liệu không đủ để dự báo đa bước.", "Insufficient data for multi-step forecast."))
                     
@@ -1141,7 +1141,7 @@ with tab4:
                 
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             st.markdown(f"#### {t('Báo Cáo Phân Tích Bằng AI', 'Generative AI Market Report')}")
-            if st.button(t("Tạo Báo Cáo AI Groq", "Generate Groq LLM Report"), width="stretch"):
+            if st.button(t("Tạo Báo Cáo AI Groq", "Generate Groq LLM Report"), use_container_width=True):
                 with st.spinner(t("Đang phân tích với Qwen 3 32B...", "Analyzing market data with Qwen 3 32B...")):
                     curr_price = df_today['View_Price'].iloc[-1]
                     curr_rsi = df_today['RSI'].iloc[-1]
