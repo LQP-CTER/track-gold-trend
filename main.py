@@ -798,27 +798,33 @@ with tab1:
         with col_spread_2:
             st.markdown(f"##### {t('Chênh Lệch Giá SJC vs Quốc Tế Quy Đổi', 'SJC Domestic Premium Spread')} ({t('Tr.VNĐ / Lượng', 'VND (Mil) / Tael')})", help=t("Mức chênh lệch thực tế giữa giá bán SJC trong nước so với giá vàng thế giới quy đổi.", "Actual spread between domestic SJC ask price and converted global base price."))
             if not df_sjc.empty and not df_world.empty:
-                df_spread = df_sjc.join(df_world[['Gold_VND']], how='inner')
-                df_spread['Spread'] = (df_spread['SJC_Sell'] / 1e6) - df_spread['Gold_VND']
+                df_world_date = df_world.copy()
+                df_world_date.index = pd.to_datetime(df_world_date.index).date
+                df_spread = df_sjc.join(df_world_date[['Gold_VND']], how='inner')
                 
-                fig_spread = go.Figure()
-                fig_spread.add_trace(go.Scatter(
-                    x=df_spread.index,
-                    y=df_spread['Spread'],
-                    mode='lines',
-                    line=dict(color='#10B981', width=1.8),
-                    fill='tozeroy',
-                    fillcolor='rgba(16, 185, 129, 0.03)',
-                    name=t("Mức Chênh Lệch", "Premium Spread")
-                ))
-                fig_spread.update_layout(yaxis_title="", template=None)
-                st.plotly_chart(style_chart(fig_spread), width="stretch")
+                if not df_spread.empty:
+                    df_spread['Spread'] = (df_spread['SJC_Sell'] / 1e6) - df_spread['Gold_VND']
+                    
+                    fig_spread = go.Figure()
+                    fig_spread.add_trace(go.Scatter(
+                        x=df_spread.index,
+                        y=df_spread['Spread'],
+                        mode='lines',
+                        line=dict(color='#10B981', width=1.8),
+                        fill='tozeroy',
+                        fillcolor='rgba(16, 185, 129, 0.03)',
+                        name=t("Mức Chênh Lệch", "Premium Spread")
+                    ))
+                    fig_spread.update_layout(yaxis_title="", template=None)
+                    st.plotly_chart(style_chart(fig_spread), width="stretch")
+                else:
+                    st.write(t("Không tìm thấy ngày giao dịch khớp giữa SJC và Quốc tế.", "No matching transaction dates found between SJC and Global price."))
             else:
                 st.write(t("Dữ liệu SJC không đủ để vẽ tương quan chênh lệch.", "Insufficient SJC data for spread correlation."))
         
         render_chart_insight({
             "Monthly_Returns_Pct": {k: float(v) for k, v in monthly_ret.to_dict().items()},
-            "SJC_Premium_Spread_Last_Value": float(df_spread['Spread'].iloc[-1]) if not df_sjc.empty and not df_world.empty else "N/A"
+            "SJC_Premium_Spread_Last_Value": float(df_spread['Spread'].iloc[-1]) if (not df_sjc.empty and not df_world.empty and 'df_spread' in locals() and not df_spread.empty) else "N/A"
         }, "Monthly Returns & SJC Premium Spread Analysis")
 
 
