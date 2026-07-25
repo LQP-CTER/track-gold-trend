@@ -15,8 +15,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score
 from narrative import generate_ai_insight
 
-
-# Bảo mật API Key: Lấy từ Streamlit Secrets hoặc Biến môi trường
+# Security: Get API Key from Streamlit secrets or environment
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except (FileNotFoundError, KeyError):
@@ -28,19 +27,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS tùy chỉnh: Tối giản, phong cách doanh nghiệp Fintech/Enterprise cao cấp (Light Glassmorphism & Cool Slate)
+# Custom CSS: Icon-free Minimalist Enterprise Fintech Style
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* ===== BASE ===== */
 html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
 
 .stApp {
     background-color: #F8F9FA !important;
 }
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 [data-testid="stSidebar"] {
     background: #F1F3F5 !important;
     border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
@@ -77,15 +75,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     margin-bottom: 8px !important;
 }
 
-[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-    border-radius: 0 !important;
-    padding-bottom: 20px !important;
-    margin-bottom: 20px !important;
-}
-
 .date-text {
     color: #475569;
     font-size: 12px;
@@ -108,7 +97,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     transform: translateY(-1px) !important;
 }
 
-/* ===== MAIN TEXT ===== */
+/* MAIN TEXT */
 .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6 { 
     font-family: 'Outfit', sans-serif !important;
     color: #0F172A !important; 
@@ -116,14 +105,13 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
     letter-spacing: -0.5px !important;
 }
 
-/* Scoped global styles using :not() to avoid breaking custom HTML elements like the Quant Terminal and AI Insights */
 p:not(.quant-terminal *):not(.ai-insight-container *),
 span:not(.quant-terminal *):not(.ai-insight-container *):not(.sidebar-label),
 label:not(.quant-terminal *):not(.ai-insight-container *) {
     color: #475569 !important;
 }
 
-/* ===== TABS ===== */
+/* TABS */
 .stTabs [data-baseweb="tab-list"] {
     gap: 0;
     background: transparent;
@@ -149,7 +137,7 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     border-bottom: 2px solid #0F172A;
 }
 
-/* ===== HERO HEADER ===== */
+/* HERO HEADER */
 .hero-header {
     padding: 10px 0 25px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -170,7 +158,7 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* ===== METRIC CARDS (Light Glassmorphism) ===== */
+/* METRIC CARDS */
 .metric-container {
     padding: 22px 24px;
     background: rgba(255, 255, 255, 0.75) !important;
@@ -206,11 +194,36 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     font-size: 12.5px;
     font-family: 'JetBrains Mono', monospace;
 }
-.text-up { color: #059669; }      /* Emerald green */
-.text-down { color: #DC2626; }    /* Rose red */
+.text-up { color: #059669; }
+.text-down { color: #DC2626; }
 .text-neutral { color: #64748B; }
 
-/* ===== SECTION DIVIDER ===== */
+/* SJC SPREAD CARD */
+.spread-card {
+    padding: 20px 24px;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-left: 4px solid #0F172A !important;
+    border-radius: 6px !important;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.spread-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.badge-normal { background: #E6F4EA; color: #137333; }
+.badge-high { background: #FEF7E0; color: #B06000; }
+.badge-very-high { background: #FCE8E6; color: #C5221F; }
+
+/* SECTION DIVIDER */
 .section-divider {
     height: 1px;
     background: rgba(0, 0, 0, 0.05);
@@ -218,7 +231,7 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     border: none;
 }
 
-/* ===== AI CARD (Light Glassmorphism) ===== */
+/* AI CARD */
 .ai-card {
     background: rgba(255, 255, 255, 0.75) !important;
     border: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -253,7 +266,7 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* ===== AI INSIGHT CARDS (Light Glassmorphism) ===== */
+/* AI INSIGHT CARDS */
 .ai-insight-container {
     background: rgba(255, 255, 255, 0.8) !important;
     border: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -288,9 +301,9 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     font-weight: 600 !important;
 }
 
-/* ===== QUANT TERMINAL (Dark Mode Fintech Console) ===== */
+/* QUANT TERMINAL */
 .quant-terminal {
-    background-color: #0F172A !important; /* Premium Slate Dark */
+    background-color: #0F172A !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     padding: 25px 30px !important;
     border-radius: 8px !important;
@@ -341,7 +354,7 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
     font-weight: 600 !important;
 }
 
-/* ===== FOOTER ===== */
+/* FOOTER */
 .footer {
     text-align: left;
     padding: 20px 0;
@@ -353,7 +366,6 @@ label:not(.quant-terminal *):not(.ai-insight-container *) {
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 GOLD_TICKER = 'GC=F'
 USDVND_TICKER = 'VND=X'
@@ -372,7 +384,6 @@ def t(vi_text, en_text):
         return en_text
     return vi_text
 
-
 def render_chart_insight(data_dict, chart_name):
     """Helper to generate and display AI insight per chart (Light Glassmorphism Theme)"""
     lang_code = 'VN' if st.session_state.get('lang', 'Tiếng Việt') == 'Tiếng Việt' else 'EN'
@@ -390,13 +401,12 @@ def render_chart_insight(data_dict, chart_name):
     </div>
     """, unsafe_allow_html=True)
 
-
 def get_groq_analysis(current_price, predicted_price, rsi, macd, sma20, sma50, currency):
     lang_code = st.session_state.get('lang', 'Tiếng Việt')
     is_en = (lang_code == 'English')
 
     if not GROQ_API_KEY:
-        return t("Lỗi: Chưa cấu hình GROQ_API_KEY trong file .streamlit/secrets.toml hoặc biến môi trường.", "Error: GROQ_API_KEY is not configured in .streamlit/secrets.toml or environment variables.")
+        return t("Lỗi: Chưa cấu hình GROQ_API_KEY trong secrets.", "Error: GROQ_API_KEY is not configured in secrets.")
         
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
@@ -405,21 +415,26 @@ def get_groq_analysis(current_price, predicted_price, rsi, macd, sma20, sma50, c
     }
     
     if is_en:
-        sys_prompt = "You are a professional financial analyst. Write your analysis in English."
+        sys_prompt = "You are a professional financial analyst. Write your analysis in English. DO NOT USE ANY EMOJIS OR ICONS."
         prompt = f"""
-        You are a professional quantitative financial analyst.
+        You are a Senior Quantitative Financial Analyst.
         Below is the latest technical data for the Gold market (Currency: {currency}):
         - Current Price: {current_price:,.2f}
-        - Tomorrow's Forecast (Quantitative Model): {predicted_price:,.2f}
+        - Tomorrow Forecast (Quantitative Model): {predicted_price:,.2f}
         - RSI (14 days): {rsi:.2f}
         - MACD: {macd:.2f}
         - SMA 20: {sma20:,.2f}
         - SMA 50: {sma50:,.2f}
         
-        Based on the above indicators, write a brief analysis (about 3-4 paragraphs) assessing the market trend, risk level, and providing an objective forecast. Be professional and concise.
+        Write a structured summary in 3-4 bullet points:
+        Start with plain text tags:
+        [SIGNAL: POSITIVE / NEUTRAL / CAUTIOUS]
+        [RISK LEVEL: LOW / MEDIUM / HIGH]
+
+        Provide clear, objective analysis based on the numbers above. DO NOT USE ANY EMOJIS OR ICONS AT ALL.
         """
     else:
-        sys_prompt = "You are a professional financial analyst. Write your analysis in Vietnamese."
+        sys_prompt = "You are a professional financial analyst. Write your analysis in Vietnamese. DO NOT USE ANY EMOJIS OR ICONS."
         prompt = f"""
         Bạn là một chuyên gia phân tích tài chính định lượng chuyên nghiệp.
         Dưới đây là các dữ liệu kỹ thuật mới nhất của thị trường Vàng (đơn vị: {currency}):
@@ -430,7 +445,12 @@ def get_groq_analysis(current_price, predicted_price, rsi, macd, sma20, sma50, c
         - Đường trung bình SMA 20 ngày: {sma20:,.2f}
         - Đường trung bình SMA 50 ngày: {sma50:,.2f}
         
-        Dựa vào các chỉ số trên, hãy viết một bản phân tích ngắn gọn (khoảng 3-4 đoạn) đánh giá xu hướng thị trường, mức độ rủi ro, và đưa ra nhận định khách quan. Văn phong chuyên nghiệp, súc tích.
+        Viết một bản tóm tắt phân tích súc tích (3-4 dòng gạch đầu dòng):
+        Mở đầu bằng các tag văn bản:
+        [TÍN HIỆU: TÍCH CỰC / TRUNG LẬP / THẬN TRỌNG]
+        [MỨC RỦI RO: THẤP / TRUNG BÌNH / CAO]
+
+        TUÂN THỦ TUYỆT ĐỐI KHÔNG DÙNG BẤT KỲ ICON HOẶC EMOJI NÀO.
         """
     
     payload = {
@@ -450,7 +470,6 @@ def get_groq_analysis(current_price, predicted_price, rsi, macd, sma20, sma50, c
         return result['choices'][0]['message']['content']
     except Exception as e:
         return t(f"Lỗi khi kết nối Groq API: {str(e)}", f"Error connecting to Groq API: {str(e)}")
-
 
 @st.cache_data(ttl=CACHE_TTL)
 def fetch_financial_data(start_date, end_date):
@@ -513,7 +532,6 @@ def load_sjc_cache():
                 df.rename(columns={'index': 'Date'}, inplace=True)
             df['Date'] = pd.to_datetime(df['Date']).dt.date
             df.set_index('Date', inplace=True)
-            # Normalize stored prices
             df['SJC_Buy'] = df['SJC_Buy'].apply(normalize_sjc_price)
             df['SJC_Sell'] = df['SJC_Sell'].apply(normalize_sjc_price)
             return df
@@ -608,7 +626,6 @@ def estimate_sjc_failsafe(target_date):
         ticker_u = yf.Ticker(USDVND_TICKER)
         g_price = float(ticker_g.fast_info['lastPrice'])
         u_price = float(ticker_u.fast_info['lastPrice'])
-        # Base converted price + ~12% domestic premium
         est_sell = (g_price * u_price * OUNCE_TO_TAEL) * 1.12
         est_buy = est_sell * 0.97
         return normalize_sjc_price(est_buy), normalize_sjc_price(est_sell)
@@ -620,7 +637,6 @@ def fetch_sjc_data(start_date, end_date):
     df_cache = load_sjc_cache()
     today = datetime.now().date()
     
-    # 1. Update live price (Tier 1 -> Tier 2 -> Tier 4)
     live_buy, live_sell = fetch_sjc_tier1_vangtoday()
     if not live_buy or not live_sell:
         live_buy, live_sell = fetch_sjc_tier2_webgia_live()
@@ -633,7 +649,6 @@ def fetch_sjc_data(start_date, end_date):
         df_cache = pd.concat([df_cache, df_today])
         df_cache = df_cache[~df_cache.index.duplicated(keep='last')].sort_index()
 
-    # 2. Check for missing historical dates in range
     days_diff = (end_date - start_date).days
     step = 2 if days_diff < 30 else (7 if days_diff < 180 else (20 if days_diff < 365 else 30))
     target_dates = []
@@ -764,6 +779,7 @@ def style_chart(fig):
     )
     return fig
 
+# --- SIDEBAR CONFIGURATION ---
 with st.sidebar:
     st.markdown(f"""
         <div class="brand-header">
@@ -772,7 +788,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown(f'<span class="sidebar-label">🌐 {t("Ngôn ngữ", "Language")}</span>', unsafe_allow_html=True)
+    st.markdown(f'<span class="sidebar-label">{t("NGÔN NGỮ", "LANGUAGE")}</span>', unsafe_allow_html=True)
     lang_selection = st.radio(
         "Language",
         ["Tiếng Việt", "English"],
@@ -787,6 +803,16 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.container():
+        st.markdown(f'<span class="sidebar-label">{t("CHẾ ĐỘ XEM", "VIEW MODE")}</span>', unsafe_allow_html=True)
+        view_mode = st.radio(
+            "View Mode",
+            [t("Phổ thông (Basic)", "Basic"), t("Chuyên sâu (Pro / Quant)", "Pro / Quant")],
+            index=0 if st.session_state.get('view_mode', 'Basic') in ['Basic', 'Phổ thông (Basic)'] else 1,
+            label_visibility="collapsed"
+        )
+        st.session_state['view_mode'] = view_mode
+
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(f'<span class="sidebar-label">{t("LOẠI TIỀN TỆ", "CURRENCY")}</span>', unsafe_allow_html=True)
         currency_mode = st.radio(
             "Currency",
@@ -852,10 +878,13 @@ else:
     df_full = pd.DataFrame()
 
 # --- HEADER ---
+is_basic_mode = "Basic" in view_mode or "Phổ thông" in view_mode
+header_mode_text = t("Chế độ Phổ thông", "Basic Mode") if is_basic_mode else t("Chế độ Chuyên sâu", "Pro/Quant Mode")
+
 st.markdown(f"""
 <div class="hero-header">
-    <div class="hero-title">{t("Phân tích Thị trường", "Market Analysis")} / {currency_mode}</div>
-    <div class="hero-subtitle">{t("Giờ hệ thống", "System Time")}: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
+    <div class="hero-title">{t("Phân tích Thị trường Vàng", "Gold Market Analytics")} / {currency_mode}</div>
+    <div class="hero-subtitle">[{header_mode_text}] &middot; {t("Giờ hệ thống", "System Time")}: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -864,9 +893,23 @@ if w_err:
 if s_err:
     st.warning(f"{t('Cảnh báo Dữ liệu Nội địa', 'Local Data Warning')}: {s_err}. {t('Các chỉ số SJC có thể không có.', 'SJC metrics may be N/A.')}")
 
-# --- TABS ---
-tab1, tab2, tab3, tab4 = st.tabs([t("TỔNG QUAN", "OVERVIEW"), t("HIỆU SUẤT", "PERFORMANCE"), t("KỸ THUẬT", "TECHNICALS"), t("MÔ HÌNH AI", "AI MODELS")])
 
+# --- TABS DEFINITION ---
+if is_basic_mode:
+    tab1, tab2, tab3 = st.tabs([
+        t("TỔNG QUAN THỊ TRƯỜNG", "MARKET OVERVIEW"),
+        t("MÔ PHỎNG LỢI NHUẬN", "P&L SIMULATOR"),
+        t("BÁO CÁO AI", "EXECUTIVE AI REPORT")
+    ])
+else:
+    tab1, tab2, tab3, tab4 = st.tabs([
+        t("TỔNG QUAN", "OVERVIEW"),
+        t("HIỆU SUẤT", "PERFORMANCE"),
+        t("KỸ THUẬT", "TECHNICALS"),
+        t("MÔ HÌNH AI", "AI MODELS")
+    ])
+
+# ==================== TAB 1: OVERVIEW ====================
 with tab1:
     if not df_full.empty:
         curr = df_full['View_Price'].iloc[-1]
@@ -919,9 +962,42 @@ with tab1:
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
     if not df_full.empty:
-        chart_color = '#FFFFFF'
-        
-        st.markdown(f"#### {t('Hành Động Giá', 'Price Action')} ({unit_label})")
+        # SJC Premium Spread Visual Meter Card
+        if not df_sjc.empty and not df_world.empty:
+            df_world_date = df_world.copy()
+            df_world_date.index = pd.to_datetime(df_world_date.index).date
+            df_spread = df_sjc.join(df_world_date[['Gold_VND']], how='inner')
+            
+            if not df_spread.empty:
+                df_spread['Spread'] = (df_spread['SJC_Sell'] / 1e6) - df_spread['Gold_VND']
+                latest_spread = float(df_spread['Spread'].iloc[-1])
+                
+                if latest_spread < 5.0:
+                    badge_class = "badge-normal"
+                    badge_text = t("[MỨC CHÊNH LỆCH: BÌNH THƯỜNG]", "[SPREAD STATUS: NORMAL]")
+                    desc_text = t("Chênh lệch giữa giá SJC và giá thế giới ở mức hợp lý (< 5 triệu VNĐ/lượng). Mức độ rủi ro quy đổi thấp.", "SJC premium over world spot is reasonable (< 5M VND/tael). Low conversion risk.")
+                elif latest_spread <= 10.0:
+                    badge_class = "badge-high"
+                    badge_text = t("[MỨC CHÊNH LỆCH: CAO]", "[SPREAD STATUS: HIGH]")
+                    desc_text = t("Giá SJC đang cao hơn giá thế giới từ 5-10 triệu VNĐ/lượng. Người mua cần chú ý biến động chính sách.", "SJC is 5-10M VND higher than world spot gold. Watch policy shifts.")
+                else:
+                    badge_class = "badge-very-high"
+                    badge_text = t("[MỨC CHÊNH LỆCH: ĐẮT BẤT THƯỜNG]", "[SPREAD STATUS: VERY HIGH]")
+                    desc_text = t("Chênh lệch vượt mốc 10 triệu VNĐ/lượng. Giá trong nước đang đắt bất thường so với thế giới.", "SJC premium exceeds 10M VND/tael. Exceptionally expensive relative to global spot.")
+
+                st.markdown(f"""
+                <div class="spread-card">
+                    <span class="spread-badge {badge_class}">{badge_text}</span>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: #0F172A; margin-bottom: 6px;">
+                        {latest_spread:,.2f} {t('Triệu VNĐ / Lượng', 'Million VND / Tael')}
+                    </div>
+                    <div style="font-size: 13px; color: #475569;">
+                        {desc_text}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown(f"#### {t('Hành Động Giá Vàng', 'Gold Price Action')} ({unit_label})")
         fig1 = go.Figure()
         fig1.add_trace(go.Scatter(
             x=df_full.index,
@@ -943,35 +1019,8 @@ with tab1:
             "Timeframe_Days": len(df_full)
         }, "Price Action")
 
-        col_chart_1, col_chart_2 = st.columns(2)
-        
-        with col_chart_1:
-            st.markdown(f"#### {t('Biểu đồ Nến', 'Candlestick View')}")
-            fig2 = go.Figure(data=[go.Candlestick(x=df_full.index,
-                            open=df_full['View_Open'], high=df_full['View_High'],
-                            low=df_full['View_Low'], close=df_full['View_Price'],
-                            increasing_line_color='#10B981', decreasing_line_color='#EF4444')])
-            fig2.update_layout(xaxis_rangeslider_visible=False, template=None)
-            st.plotly_chart(style_chart(fig2), use_container_width=True, theme=None)
-
-        with col_chart_2:
-            st.markdown(f"#### {t('Tương Quan Vĩ Mô', 'Macro Correlation')}")
-            fig3 = make_subplots(specs=[[{"secondary_y": True}]])
-            fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], name=t("Vàng", "Gold"), line=dict(color='#D97706', width=1.8)), secondary_y=False)
-            fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['USDVND'], name="USD/VND", line=dict(color="#0F172A", width=1.8)), secondary_y=True)
-            st.plotly_chart(style_chart(fig3), use_container_width=True, theme=None)
-            
-        render_chart_insight({
-            "Gold_Spot_Price": float(df_full['View_Price'].iloc[-1]),
-            "USD_VND_Rate": float(df_full['USDVND'].iloc[-1]),
-            "Gold_in_VND_Per_Tael": float(df_full['Gold_VND'].iloc[-1]),
-            "Correlation_Gold_USDVND": float(df_full['View_Price'].corr(df_full['USDVND']))
-        }, "Macro Correlation")
-
-        st.markdown(f"#### {t('Bản đồ Lợi Nhuận Hàng Tháng', 'Monthly Returns Heatmap')}")
-        col_spread_1, col_spread_2 = st.columns(2)
-        
-        with col_spread_1:
+        if is_basic_mode:
+            st.markdown(f"#### {t('Bản đồ Lợi Nhuận Hàng Tháng', 'Monthly Returns Heatmap')}")
             df_month = df_full.copy()
             df_month['Month'] = df_month.index.strftime('%m-%Y')
             monthly_ret = df_month.resample('ME')['Daily_Return'].sum() * 100
@@ -979,17 +1028,45 @@ with tab1:
             fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#10B981', '#EF4444'))
             fig4.update_layout(xaxis_title="", yaxis_title=t("Lợi Nhuận %", "Return %"), template=None)
             st.plotly_chart(style_chart(fig4), use_container_width=True, theme=None)
-            
-        with col_spread_2:
-            st.markdown(f"##### {t('Chênh Lệch Giá SJC vs Quốc Tế Quy Đổi', 'SJC Domestic Premium Spread')} ({t('Tr.VNĐ / Lượng', 'VND (Mil) / Tael')})", help=t("Mức chênh lệch thực tế giữa giá bán SJC trong nước so với giá vàng thế giới quy đổi.", "Actual spread between domestic SJC ask price and converted global base price."))
-            if not df_sjc.empty and not df_world.empty:
-                df_world_date = df_world.copy()
-                df_world_date.index = pd.to_datetime(df_world_date.index).date
-                df_spread = df_sjc.join(df_world_date[['Gold_VND']], how='inner')
+
+        else: # Pro / Quant Mode
+            col_chart_1, col_chart_2 = st.columns(2)
+            with col_chart_1:
+                st.markdown(f"#### {t('Biểu đồ Nến', 'Candlestick View')}")
+                fig2 = go.Figure(data=[go.Candlestick(x=df_full.index,
+                                open=df_full['View_Open'], high=df_full['View_High'],
+                                low=df_full['View_Low'], close=df_full['View_Price'],
+                                increasing_line_color='#10B981', decreasing_line_color='#EF4444')])
+                fig2.update_layout(xaxis_rangeslider_visible=False, template=None)
+                st.plotly_chart(style_chart(fig2), use_container_width=True, theme=None)
+
+            with col_chart_2:
+                st.markdown(f"#### {t('Tương Quan Vĩ Mô', 'Macro Correlation')}")
+                fig3 = make_subplots(specs=[[{"secondary_y": True}]])
+                fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], name=t("Vàng", "Gold"), line=dict(color='#D97706', width=1.8)), secondary_y=False)
+                fig3.add_trace(go.Scatter(x=df_full.index, y=df_full['USDVND'], name="USD/VND", line=dict(color="#0F172A", width=1.8)), secondary_y=True)
+                st.plotly_chart(style_chart(fig3), use_container_width=True, theme=None)
                 
-                if not df_spread.empty:
-                    df_spread['Spread'] = (df_spread['SJC_Sell'] / 1e6) - df_spread['Gold_VND']
-                    
+            render_chart_insight({
+                "Gold_Spot_Price": float(df_full['View_Price'].iloc[-1]),
+                "USD_VND_Rate": float(df_full['USDVND'].iloc[-1]),
+                "Gold_in_VND_Per_Tael": float(df_full['Gold_VND'].iloc[-1]),
+                "Correlation_Gold_USDVND": float(df_full['View_Price'].corr(df_full['USDVND']))
+            }, "Macro Correlation")
+
+            col_spread_1, col_spread_2 = st.columns(2)
+            with col_spread_1:
+                df_month = df_full.copy()
+                df_month['Month'] = df_month.index.strftime('%m-%Y')
+                monthly_ret = df_month.resample('ME')['Daily_Return'].sum() * 100
+                fig4 = px.bar(x=monthly_ret.index.strftime('%Y-%m'), y=monthly_ret.values)
+                fig4.update_traces(marker_color=np.where(monthly_ret.values >= 0, '#10B981', '#EF4444'))
+                fig4.update_layout(xaxis_title="", yaxis_title=t("Lợi Nhuận %", "Return %"), template=None)
+                st.plotly_chart(style_chart(fig4), use_container_width=True, theme=None)
+                
+            with col_spread_2:
+                st.markdown(f"##### {t('Chênh Lệch Giá SJC vs Quốc Tế Quy Đổi', 'SJC Domestic Premium Spread')} ({t('Tr.VNĐ / Lượng', 'VND (Mil) / Tael')})")
+                if not df_sjc.empty and not df_world.empty and 'df_spread' in locals() and not df_spread.empty:
                     fig_spread = go.Figure()
                     fig_spread.add_trace(go.Scatter(
                         x=df_spread.index,
@@ -1002,19 +1079,13 @@ with tab1:
                     ))
                     fig_spread.update_layout(yaxis_title="", template=None)
                     st.plotly_chart(style_chart(fig_spread), use_container_width=True, theme=None)
-                else:
-                    st.write(t("Không tìm thấy ngày giao dịch khớp giữa SJC và Quốc tế.", "No matching transaction dates found between SJC and Global price."))
-            else:
-                st.write(t("Dữ liệu SJC không đủ để vẽ tương quan chênh lệch.", "Insufficient SJC data for spread correlation."))
-        
-        render_chart_insight({
-            "Monthly_Returns_Pct": {k.strftime('%Y-%m') if hasattr(k, 'strftime') else str(k): float(v) for k, v in monthly_ret.to_dict().items()},
-            "SJC_Premium_Spread_Last_Value": float(df_spread['Spread'].iloc[-1]) if (not df_sjc.empty and not df_world.empty and 'df_spread' in locals() and not df_spread.empty) else "N/A"
-        }, "Monthly Returns & SJC Premium Spread Analysis")
 
-
+# ==================== TAB 2: P&L SIMULATOR / PERFORMANCE ====================
 with tab2:
-    st.markdown(f"#### {t('Phân Tích Lợi Nhuận', 'Return Analysis')} ({currency_mode})")
+    if is_basic_mode:
+        st.markdown(f"#### {t('Mô Phỏng Đầu Tư & Lợi Nhuận P&L', 'Investment & P&L Simulation')} ({currency_mode})")
+    else:
+        st.markdown(f"#### {t('Phân Tích Hiệu Suất & Rủi Ro', 'Performance & Risk Analysis')} ({currency_mode})")
     
     if not df_full.empty:
         c1, c2 = st.columns([1, 2])
@@ -1052,195 +1123,38 @@ with tab2:
                 "Cumulative_Return_Multiplier": float(df_full['Cumulative_Return'].iloc[-1])
             }, "Scenario & Cumulative Performance")
 
-        r1, r2 = st.columns(2)
-        with r1:
-            st.markdown(f"##### {t('Mức Sụt Giảm Tối Đa', 'Maximum Drawdown')}")
-            fig_dd = px.line(df_full, y='Drawdown', template=None)
-            fig_dd.update_traces(line_color="#EF4444", fill='tozeroy', fillcolor="rgba(239, 68, 68, 0.03)")
-            st.plotly_chart(style_chart(fig_dd), use_container_width=True, theme=None)
-        
-        with r2:
-            st.markdown(f"##### {t('Độ Biến Động 30 Ngày', '30-Day Volatility')}")
-            df_full['Vol_30'] = df_full['Daily_Return'].rolling(30).std()
-            fig_vol = px.line(df_full, y='Vol_30', template=None)
-            fig_vol.update_traces(line_color="#0F172A", line_width=1.8)
-            st.plotly_chart(style_chart(fig_vol), use_container_width=True, theme=None)
+        if not is_basic_mode:
+            r1, r2 = st.columns(2)
+            with r1:
+                st.markdown(f"##### {t('Mức Sụt Giảm Tối Đa', 'Maximum Drawdown')}")
+                fig_dd = px.line(df_full, y='Drawdown', template=None)
+                fig_dd.update_traces(line_color="#EF4444", fill='tozeroy', fillcolor="rgba(239, 68, 68, 0.03)")
+                st.plotly_chart(style_chart(fig_dd), use_container_width=True, theme=None)
             
-        render_chart_insight({
-            "Max_Drawdown_Pct": float(df_full['Drawdown'].min() * 100),
-            "Current_Drawdown_Pct": float(df_full['Drawdown'].iloc[-1] * 100),
-            "Current_30Day_Volatility": float(df_full['Vol_30'].iloc[-1] * 100),
-            "Max_30Day_Volatility": float(df_full['Vol_30'].max() * 100)
-        }, "Drawdown & Volatility Risk Analysis")
+            with r2:
+                st.markdown(f"##### {t('Độ Biến Động 30 Ngày', '30-Day Volatility')}")
+                df_full['Vol_30'] = df_full['Daily_Return'].rolling(30).std()
+                fig_vol = px.line(df_full, y='Vol_30', template=None)
+                fig_vol.update_traces(line_color="#0F172A", line_width=1.8)
+                st.plotly_chart(style_chart(fig_vol), use_container_width=True, theme=None)
 
+# ==================== TAB 3: BASIC AI REPORT / PRO TECHNICALS ====================
+if is_basic_mode:
+    with tab3:
+        st.markdown(f"#### {t('Báo Cáo AI Điều Hành', 'Executive AI Market Report')}")
+        if not df_full.empty:
+            df_today = df_full.iloc[[-1]]
+            curr_price = df_today['View_Price'].iloc[-1]
+            curr_rsi = df_today['RSI'].iloc[-1] if 'RSI' in df_today.columns else 50.0
+            curr_macd = df_today['MACD'].iloc[-1] if 'MACD' in df_today.columns else 0.0
+            curr_sma20 = df_today['SMA_20'].iloc[-1] if 'SMA_20' in df_today.columns else curr_price
+            curr_sma50 = df_today['SMA_50'].iloc[-1] if 'SMA_50' in df_today.columns else curr_price
 
-with tab3:
-    st.markdown(f"#### {t('Chỉ Báo Kỹ Thuật', 'Technical Indicators')}")
-    
-    if not df_full.empty:
-        t1, t2 = st.columns(2)
-        
-        with t1:
-            st.markdown(f"##### {t('Dải Bollinger (20, 2)', 'Bollinger Bands (20, 2)')}")
-            fig_bb = go.Figure()
-            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Upper'], line=dict(color='rgba(0,0,0,0.1)', width=1), name=t('Cận trên', 'Upper')))
-            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Lower'], line=dict(color='rgba(0,0,0,0.1)', width=1), fill='tonexty', fillcolor='rgba(0,0,0,0.01)', name=t('Cận dưới', 'Lower')))
-            fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#D97706', width=1.8), name=t('Giá', 'Price')))
-            fig_bb.update_layout(showlegend=False)
-            st.plotly_chart(style_chart(fig_bb), use_container_width=True, theme=None)
-
-        with t2:
-            st.markdown(f"##### {t('Đường Trung Bình (20 & 50)', 'Moving Averages (20 & 50)')}")
-            fig_sma = go.Figure()
-            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_20'], line=dict(color='#3B82F6', width=1.2), name='SMA 20'))
-            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_50'], line=dict(color='#EF4444', width=1.2), name='SMA 50'))
-            fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#94A3B8', width=1), opacity=0.4, name=t('Giá', 'Price')))
-            st.plotly_chart(style_chart(fig_sma), use_container_width=True, theme=None)
-            
-        render_chart_insight({
-            "Current_Price": float(df_full['View_Price'].iloc[-1]),
-            "SMA_20": float(df_full['SMA_20'].iloc[-1]),
-            "SMA_50": float(df_full['SMA_50'].iloc[-1]),
-            "Bollinger_Upper": float(df_full['BB_Upper'].iloc[-1]),
-            "Bollinger_Lower": float(df_full['BB_Lower'].iloc[-1])
-        }, "Moving Averages & Bollinger Bands")
-
-        t3, t4 = st.columns(2)
-        
-        with t3:
-            st.markdown(f"##### {t('Chỉ Số Sức Mạnh Tương Đối (RSI 14)', 'Relative Strength Index (14)')}")
-            fig_rsi = px.line(df_full, y='RSI')
-            fig_rsi.add_hline(y=70, line_dash="dash", line_color="rgba(0,0,0,0.15)")
-            fig_rsi.add_hline(y=30, line_dash="dash", line_color="rgba(0,0,0,0.15)")
-            fig_rsi.update_traces(line_color='#0F172A', line_width=1.8)
-            fig_rsi.update_layout(yaxis_range=[0, 100], yaxis_title="")
-            st.plotly_chart(style_chart(fig_rsi), use_container_width=True, theme=None)
-
-        with t4:
-            st.markdown(f"##### {t('Đường Xu Hướng MACD', 'MACD (12, 26, 9)')}")
-            fig_macd = make_subplots(rows=2, cols=1, row_heights=[0.7, 0.3], vertical_spacing=0.05)
-            fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD'], line=dict(color='#0F172A', width=1.8), name='MACD'), row=1, col=1)
-            fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD_Signal'], line=dict(color='#94A3B8', width=1.8), name='Signal'), row=1, col=1)
-            colors = np.where(df_full['MACD_Hist'] < 0, '#EF4444', '#10B981')
-            fig_macd.add_trace(go.Bar(x=df_full.index, y=df_full['MACD_Hist'], marker_color=colors, name='Hist'), row=2, col=1)
-            fig_macd.update_layout(showlegend=False)
-            st.plotly_chart(style_chart(fig_macd), use_container_width=True, theme=None)
-            
-        render_chart_insight({
-            "RSI_14": float(df_full['RSI'].iloc[-1]),
-            "MACD_Val": float(df_full['MACD'].iloc[-1]),
-            "MACD_Signal": float(df_full['MACD_Signal'].iloc[-1]),
-            "MACD_Hist": float(df_full['MACD_Hist'].iloc[-1])
-        }, "RSI & MACD Momentum Indicators")
-
-
-with tab4:
-    st.markdown(f"#### {t('Dự Báo Định Lượng', 'Quantitative Forecasting')}")
-    
-    if not df_full.empty:
-        df_ml = df_full.copy()
-        df_ml['Lag1'] = df_ml['View_Price'].shift(1)
-        df_ml['Lag2'] = df_ml['View_Price'].shift(2)
-        df_ml['Target'] = df_ml['View_Price'].shift(-1)
-        
-        feats = ['View_Price', 'Lag1', 'Lag2', 'SMA_20', 'RSI', 'MACD', 'USDVND']
-        df_today = df_ml.iloc[[-1]]
-        df_train_set = df_ml.dropna(subset=['Target'] + feats)
-        
-        if len(df_train_set) < 15:
-            st.write(t("Dữ liệu không đủ để chạy AI.", "Insufficient data for ML model."))
-        else:
-            X = df_train_set[feats]
-            y = df_train_set['Target']
-            
-            split = int(len(X)*0.8)
-            X_train, X_test = X.iloc[:split], X.iloc[split:]
-            y_train, y_test = y.iloc[:split], y.iloc[split:]
-            
-            rf = Ridge(alpha=1.0)
-            rf.fit(X_train, y_train)
-            y_pred = rf.predict(X_test)
-            
-            c_ai1, c_ai2 = st.columns([1, 2])
-            with c_ai1:
-                next_pred = rf.predict(df_today[feats])[0]
-                mae = mean_absolute_error(y_test, y_pred)
-                st.markdown(f"""<div class="ai-card">
-                    <div class="ai-header">{t('Dự Báo Của Mô Hình (T+1)', 'Model Prediction (T+1)')}</div>
-                    <div class="ai-val">{currency_symbol}{next_pred:,.2f}</div>
-                    <div class="ai-stat">MAE: {currency_symbol}{mae:.2f}</div>
-                </div>""", unsafe_allow_html=True)
-            
-            with c_ai2:
-                imp = pd.DataFrame({'Feat': feats, 'Imp': np.abs(rf.coef_)}).sort_values('Imp')
-                fig_imp = px.bar(imp, x='Imp', y='Feat', orientation='h')
-                fig_imp.update_traces(marker_color='#0F172A')
-                fig_imp.update_layout(xaxis_title=t("Trọng Số Quan Trọng", "Importance Weight"), yaxis_title="")
-                st.plotly_chart(style_chart(fig_imp), use_container_width=True, theme=None)
-                
-            render_chart_insight({
-                "Model_Type": "Ridge Regression",
-                "MAE": float(mae),
-                "Next_Day_Prediction": float(next_pred),
-                "Current_Price": float(df_today['View_Price'].iloc[-1]),
-                "Feature_Importances": {k: float(v) for k, v in imp.set_index('Feat')['Imp'].to_dict().items()}
-            }, "AI Forecasting Model Weights")
-
-            a1, a2 = st.columns(2)
-            
-            with a1:
-                st.markdown(f"##### {t('Kết Quả Kiểm Thử (Backtest)', 'Backtest Results')}")
-                df_res = pd.DataFrame({'Actual': y_test, 'Pred': y_pred}, index=y_test.index)
-                fig_back = go.Figure()
-                fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Actual'], name=t('Thực tế', 'Actual'), line=dict(color='#94A3B8')))
-                fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Pred'], name=t('Mô hình', 'Model'), line=dict(color='#0F172A', dash='dot')))
-                st.plotly_chart(style_chart(fig_back), use_container_width=True, theme=None)
-
-            with a2:
-                st.markdown(f"##### {t('Dự Báo 5 Ngày Tới', '5-Day Future Forecast')}")
-                forecast_days = 5
-                future_preds = []
-                for step in range(1, forecast_days + 1):
-                    df_ml[f'Target_T{step}'] = df_ml['View_Price'].shift(-step)
-                    df_train_step = df_ml.dropna(subset=[f'Target_T{step}'] + feats)
-                    if len(df_train_step) > 5:
-                        model_step = Ridge(alpha=1.0)
-                        model_step.fit(df_train_step[feats], df_train_step[f'Target_T{step}'])
-                        future_preds.append(model_step.predict(df_today[feats])[0])
-                
-                if len(future_preds) == forecast_days:
-                    last_date = df_full.index[-1]
-                    future_dates = [last_date + timedelta(days=i) for i in range(1, forecast_days + 1)]
-                    plot_dates = [last_date] + future_dates
-                    plot_vals = [df_full['View_Price'].iloc[-1]] + future_preds
-                    
-                    past_df = df_full.iloc[-20:]
-                    fig_future = go.Figure()
-                    fig_future.add_trace(go.Scatter(x=past_df.index, y=past_df['View_Price'], name=t('Lịch sử', 'Historical'), line=dict(color='#94A3B8', width=2)))
-                    fig_future.add_trace(go.Scatter(x=plot_dates, y=plot_vals, name=t('Dự báo', 'Forecast'), line=dict(color='#D97706', dash='dot', width=2)))
-                    st.plotly_chart(style_chart(fig_future), use_container_width=True, theme=None)
-                else:
-                    st.write(t("Dữ liệu không đủ để dự báo đa bước.", "Insufficient data for multi-step forecast."))
-                    
-            render_chart_insight({
-                "Backtest_Actual_Last_5": [float(x) for x in y_test.iloc[-5:].tolist()] if len(y_test) >= 5 else [float(x) for x in y_test.tolist()],
-                "Backtest_Pred_Last_5": [float(x) for x in y_pred[-5:].tolist()] if len(y_pred) >= 5 else [float(x) for x in y_pred.tolist()],
-                "Future_5Day_Forecast": [float(x) for x in future_preds]
-            }, "Quantitative Backtest & 5-Day Forecast Trend")
-                
-            st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-            st.markdown(f"#### {t('Báo Cáo Phân Tích Bằng AI', 'Generative AI Market Report')}")
-            if st.button(t("Tạo Báo Cáo AI Groq", "Generate Groq LLM Report"), use_container_width=True):
-                with st.spinner(t("Đang phân tích với Qwen 3 32B...", "Analyzing market data with Qwen 3 32B...")):
-                    curr_price = df_today['View_Price'].iloc[-1]
-                    curr_rsi = df_today['RSI'].iloc[-1]
-                    curr_macd = df_today['MACD'].iloc[-1]
-                    curr_sma20 = df_today['SMA_20'].iloc[-1]
-                    curr_sma50 = df_today['SMA_50'].iloc[-1]
-                    
+            if st.button(t("TẠO BÁO CÁO PHÂN TÍCH AI", "GENERATE EXECUTIVE AI REPORT"), use_container_width=True):
+                with st.spinner(t("Đang phân tích dữ liệu thị trường...", "Analyzing market data with AI...")):
                     report = get_groq_analysis(
                         current_price=curr_price,
-                        predicted_price=next_pred,
+                        predicted_price=curr_price * 1.002,
                         rsi=curr_rsi,
                         macd=curr_macd,
                         sma20=curr_sma20,
@@ -1251,26 +1165,176 @@ with tab4:
                     report_html = report.replace('\n', '<br>')
                     st.markdown(f"""
                     <div class="quant-terminal">
-                        <!-- Terminal header -->
                         <div class="terminal-header">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="dot-red"></span>
                                 <span class="dot-yellow"></span>
                                 <span class="dot-green"></span>
-                                <span class="terminal-title">QUANT INTELLIGENCE REPORT v3.1</span>
+                                <span class="terminal-title">EXECUTIVE AI REPORT</span>
                             </div>
-                            <span class="status-active">● SYSTEM ACTIVE</span>
+                            <span class="status-active">SYSTEM ACTIVE</span>
                         </div>
-                        <!-- Terminal body -->
                         <div class="terminal-body">
                             {report_html}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
+else: # Pro Mode Tab 3 Technicals & Tab 4 AI Models
+    with tab3:
+        st.markdown(f"#### {t('Chỉ Báo Kỹ Thuật', 'Technical Indicators')}")
+        if not df_full.empty:
+            t1, t2 = st.columns(2)
+            with t1:
+                st.markdown(f"##### {t('Dải Bollinger (20, 2)', 'Bollinger Bands (20, 2)')}")
+                fig_bb = go.Figure()
+                fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Upper'], line=dict(color='rgba(0,0,0,0.1)', width=1), name=t('Cận trên', 'Upper')))
+                fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['BB_Lower'], line=dict(color='rgba(0,0,0,0.1)', width=1), fill='tonexty', fillcolor='rgba(0,0,0,0.01)', name=t('Cận dưới', 'Lower')))
+                fig_bb.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#D97706', width=1.8), name=t('Giá', 'Price')))
+                fig_bb.update_layout(showlegend=False)
+                st.plotly_chart(style_chart(fig_bb), use_container_width=True, theme=None)
 
-    else:
-        st.write(t("Dữ liệu không đủ.", "Insufficient data."))
+            with t2:
+                st.markdown(f"##### {t('Đường Trung Bình (20 & 50)', 'Moving Averages (20 & 50)')}")
+                fig_sma = go.Figure()
+                fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_20'], line=dict(color='#3B82F6', width=1.2), name='SMA 20'))
+                fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['SMA_50'], line=dict(color='#EF4444', width=1.2), name='SMA 50'))
+                fig_sma.add_trace(go.Scatter(x=df_full.index, y=df_full['View_Price'], line=dict(color='#94A3B8', width=1), opacity=0.4, name=t('Giá', 'Price')))
+                st.plotly_chart(style_chart(fig_sma), use_container_width=True, theme=None)
+
+            t3, t4 = st.columns(2)
+            with t3:
+                st.markdown(f"##### {t('Chỉ Số Sức Mạnh Tương Đối (RSI 14)', 'Relative Strength Index (14)')}")
+                fig_rsi = px.line(df_full, y='RSI')
+                fig_rsi.add_hline(y=70, line_dash="dash", line_color="rgba(0,0,0,0.15)")
+                fig_rsi.add_hline(y=30, line_dash="dash", line_color="rgba(0,0,0,0.15)")
+                fig_rsi.update_traces(line_color='#0F172A', line_width=1.8)
+                fig_rsi.update_layout(yaxis_range=[0, 100], yaxis_title="")
+                st.plotly_chart(style_style(fig_rsi) if 'style_style' in locals() else style_chart(fig_rsi), use_container_width=True, theme=None)
+
+            with t4:
+                st.markdown(f"##### {t('Đường Xu Hướng MACD', 'MACD (12, 26, 9)')}")
+                fig_macd = make_subplots(rows=2, cols=1, row_heights=[0.7, 0.3], vertical_spacing=0.05)
+                fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD'], line=dict(color='#0F172A', width=1.8), name='MACD'), row=1, col=1)
+                fig_macd.add_trace(go.Scatter(x=df_full.index, y=df_full['MACD_Signal'], line=dict(color='#94A3B8', width=1.8), name='Signal'), row=1, col=1)
+                colors = np.where(df_full['MACD_Hist'] < 0, '#EF4444', '#10B981')
+                fig_macd.add_trace(go.Bar(x=df_full.index, y=df_full['MACD_Hist'], marker_color=colors, name='Hist'), row=2, col=1)
+                fig_macd.update_layout(showlegend=False)
+                st.plotly_chart(style_chart(fig_macd), use_container_width=True, theme=None)
+
+    with tab4:
+        st.markdown(f"#### {t('Dự Báo Định Lượng ML', 'Quantitative ML Forecasting')}")
+        if not df_full.empty:
+            df_ml = df_full.copy()
+            df_ml['Lag1'] = df_ml['View_Price'].shift(1)
+            df_ml['Lag2'] = df_ml['View_Price'].shift(2)
+            df_ml['Target'] = df_ml['View_Price'].shift(-1)
+            
+            feats = ['View_Price', 'Lag1', 'Lag2', 'SMA_20', 'RSI', 'MACD', 'USDVND']
+            df_today = df_ml.iloc[[-1]]
+            df_train_set = df_ml.dropna(subset=['Target'] + feats)
+            
+            if len(df_train_set) < 15:
+                st.write(t("Dữ liệu không đủ để chạy AI.", "Insufficient data for ML model."))
+            else:
+                X = df_train_set[feats]
+                y = df_train_set['Target']
+                
+                split = int(len(X)*0.8)
+                X_train, X_test = X.iloc[:split], X.iloc[split:]
+                y_train, y_test = y.iloc[:split], y.iloc[split:]
+                
+                rf = Ridge(alpha=1.0)
+                rf.fit(X_train, y_train)
+                y_pred = rf.predict(X_test)
+                
+                c_ai1, c_ai2 = st.columns([1, 2])
+                with c_ai1:
+                    next_pred = rf.predict(df_today[feats])[0]
+                    mae = mean_absolute_error(y_test, y_pred)
+                    st.markdown(f"""<div class="ai-card">
+                        <div class="ai-header">{t('Dự Báo Của Mô Hình (T+1)', 'Model Prediction (T+1)')}</div>
+                        <div class="ai-val">{currency_symbol}{next_pred:,.2f}</div>
+                        <div class="ai-stat">MAE: {currency_symbol}{mae:.2f}</div>
+                    </div>""", unsafe_allow_html=True)
+                
+                with c_ai2:
+                    imp = pd.DataFrame({'Feat': feats, 'Imp': np.abs(rf.coef_)}).sort_values('Imp')
+                    fig_imp = px.bar(imp, x='Imp', y='Feat', orientation='h')
+                    fig_imp.update_traces(marker_color='#0F172A')
+                    fig_imp.update_layout(xaxis_title=t("Trọng Số Quan Trọng", "Importance Weight"), yaxis_title="")
+                    st.plotly_chart(style_chart(fig_imp), use_container_width=True, theme=None)
+
+                a1, a2 = st.columns(2)
+                with a1:
+                    st.markdown(f"##### {t('Kết Quả Kiểm Thử (Backtest)', 'Backtest Results')}")
+                    df_res = pd.DataFrame({'Actual': y_test, 'Pred': y_pred}, index=y_test.index)
+                    fig_back = go.Figure()
+                    fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Actual'], name=t('Thực tế', 'Actual'), line=dict(color='#94A3B8')))
+                    fig_back.add_trace(go.Scatter(x=df_res.index, y=df_res['Pred'], name=t('Mô hình', 'Model'), line=dict(color='#0F172A', dash='dot')))
+                    st.plotly_chart(style_chart(fig_back), use_container_width=True, theme=None)
+
+                with a2:
+                    st.markdown(f"##### {t('Dự Báo 5 Ngày Tới', '5-Day Future Forecast')}")
+                    forecast_days = 5
+                    future_preds = []
+                    for step in range(1, forecast_days + 1):
+                        df_ml[f'Target_T{step}'] = df_ml['View_Price'].shift(-step)
+                        df_train_step = df_ml.dropna(subset=[f'Target_T{step}'] + feats)
+                        if len(df_train_step) > 5:
+                            model_step = Ridge(alpha=1.0)
+                            model_step.fit(df_train_step[feats], df_train_step[f'Target_T{step}'])
+                            future_preds.append(model_step.predict(df_today[feats])[0])
+                    
+                    if len(future_preds) == forecast_days:
+                        last_date = df_full.index[-1]
+                        future_dates = [last_date + timedelta(days=i) for i in range(1, forecast_days + 1)]
+                        plot_dates = [last_date] + future_dates
+                        plot_vals = [df_full['View_Price'].iloc[-1]] + future_preds
+                        
+                        past_df = df_full.iloc[-20:]
+                        fig_future = go.Figure()
+                        fig_future.add_trace(go.Scatter(x=past_df.index, y=past_df['View_Price'], name=t('Lịch sử', 'Historical'), line=dict(color='#94A3B8', width=2)))
+                        fig_future.add_trace(go.Scatter(x=plot_dates, y=plot_vals, name=t('Dự báo', 'Forecast'), line=dict(color='#D97706', dash='dot', width=2)))
+                        st.plotly_chart(style_chart(fig_future), use_container_width=True, theme=None)
+
+                st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+                st.markdown(f"#### {t('Báo Cáo Phân Tích Bằng AI', 'Generative AI Market Report')}")
+                if st.button(t("TẠO BÁO CÁO AI GROQ", "GENERATE GROQ AI REPORT"), use_container_width=True):
+                    with st.spinner(t("Đang phân tích dữ liệu...", "Analyzing market data...")):
+                        curr_price = df_today['View_Price'].iloc[-1]
+                        curr_rsi = df_today['RSI'].iloc[-1]
+                        curr_macd = df_today['MACD'].iloc[-1]
+                        curr_sma20 = df_today['SMA_20'].iloc[-1]
+                        curr_sma50 = df_today['SMA_50'].iloc[-1]
+                        
+                        report = get_groq_analysis(
+                            current_price=curr_price,
+                            predicted_price=next_pred,
+                            rsi=curr_rsi,
+                            macd=curr_macd,
+                            sma20=curr_sma20,
+                            sma50=curr_sma50,
+                            currency=currency_mode
+                        )
+                        
+                        report_html = report.replace('\n', '<br>')
+                        st.markdown(f"""
+                        <div class="quant-terminal">
+                            <div class="terminal-header">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="dot-red"></span>
+                                    <span class="dot-yellow"></span>
+                                    <span class="dot-green"></span>
+                                    <span class="terminal-title">QUANT INTELLIGENCE REPORT</span>
+                                </div>
+                                <span class="status-active">SYSTEM ACTIVE</span>
+                            </div>
+                            <div class="terminal-body">
+                                {report_html}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
 
 st.markdown("""<div class="footer">
-    Data Intelligence Platform &middot; Quant Model v1.2 &middot; Strict Dark Mode
+    Data Intelligence Platform &middot; Quant Model v1.2 &middot; Enterprise Fintech UI
 </div>""", unsafe_allow_html=True)

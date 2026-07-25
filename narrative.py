@@ -20,7 +20,7 @@ except:
 def generate_ai_insight(data_json, dashboard_section="Overview", lang='VN'):
     """Generic AI Insight Generator reading JSON data for any gold market dashboard section."""
     if not client:
-        return "Warning: GROQ_API_KEY not found in secrets or environment variables." if lang == 'EN' else "⚠️ Cảnh báo: Chưa cấu hình GROQ_API_KEY trong cấu hình."
+        return "Warning: GROQ_API_KEY not found in secrets or environment variables." if lang == 'EN' else "Cảnh báo: Chưa cấu hình GROQ_API_KEY trong cấu hình."
         
     prompt = f"""
     You are a Senior Quantitative Gold Strategist and Financial Analyst.
@@ -30,13 +30,16 @@ def generate_ai_insight(data_json, dashboard_section="Overview", lang='VN'):
     {data_json}
 
     Task:
-    Analyze this quantitative data, identify any key trends, risks, anomalies, or support/resistance points (e.g. price trends, RSI momentum levels, MACD crossovers, forecasting errors, or volatility changes), and write a concise, professional analysis (strictly 2-3 sentences max) summarizing the situation and recommending a logical action or stance.
+    Analyze this quantitative data, identify key trends, risks, anomalies, or support/resistance points.
+    Write a clear, structured summary in 2-3 bullet points. Start with a header line like:
+    "[TÍN HIỆU: TÍCH CỰC / TRUNG LẬP / THẬN TRỌNG] - [MỨC RỦI RO: THẤP / TRUNG BÌNH / CAO]" (in Vietnamese)
+    or "[SIGNAL: POSITIVE / NEUTRAL / CAUTIOUS] - [RISK LEVEL: LOW / MEDIUM / HIGH]" (in English).
 
     Strict Requirements:
     - Write the analysis in {'Vietnamese' if lang == 'VN' else 'English'}.
     - Keep the tone highly professional, precise, quantitative, and institutional-grade.
-    - DO NOT USE ANY EMOJIS OR ICONS AT ALL (strictly prohibited).
-    - Base your claims strictly on the actual numbers in the JSON data, avoiding generic advice or vague statements.
+    - ABSOLUTELY NO EMOJIS OR ICONS AT ALL (strictly prohibited). Use plain text tags like [TÍN HIỆU: TÍCH CỰC] instead.
+    - Base your claims strictly on the actual numbers in the JSON data.
     """
     
     try:
