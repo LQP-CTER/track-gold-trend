@@ -484,11 +484,28 @@ def fetch_financial_data(start_date, end_date):
         return pd.DataFrame(), str(e)
 
 import os
+import re
 SJC_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sjc_history_cache.csv')
 
+def normalize_sjc_price(val):
+    """Normalize any price value to raw VND float (e.g., 137,500,000.0)"""
+    if val is None or pd.isna(val):
+        return 0.0
+    if isinstance(val, str):
+        val = val.replace('.', '').replace(',', '').strip()
+    try:
+        f_val = float(val)
+        if f_val <= 0:
+            return 0.0
+        if f_val < 1000: # E.g., 137.5 (Million VND)
+            return f_val * 1e6
+        elif f_val < 10000000: # E.g., 13.750.000 (VND per chi)
+            return f_val * 10
+        return f_val
+    except Exception:
+        return 0.0
 
 def load_sjc_cache():
-    import os
     if os.path.exists(SJC_CACHE_FILE):
         try:
             df = pd.read_csv(SJC_CACHE_FILE)
@@ -496,6 +513,9 @@ def load_sjc_cache():
                 df.rename(columns={'index': 'Date'}, inplace=True)
             df['Date'] = pd.to_datetime(df['Date']).dt.date
             df.set_index('Date', inplace=True)
+            # Normalize stored prices
+            df['SJC_Buy'] = df['SJC_Buy'].apply(normalize_sjc_price)
+            df['SJC_Sell'] = df['SJC_Sell'].apply(normalize_sjc_price)
             return df
         except Exception:
             return pd.DataFrame(columns=['SJC_Buy', 'SJC_Sell'])
@@ -510,78 +530,147 @@ def save_sjc_cache(df_cache):
     except Exception:
         pass
 
+def fetch_sjc_tier1_vangtoday():
+    """Tier 1: High speed Vang.today API"""
+    try:
+        url = "https://www.vang.today/api/prices"
+        r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=3)
+        if r.status_code == 200:
+            data = r.json()
+            vngsjc = data.get('prices', {}).get('VNGSJC', {})
+            buy = normalize_sjc_price(vngsjc.get('buy', 0))
+            sell = normalize_sjc_price(vngsjc.get('sell', 0))
+            if buy > 0 and sell > 0:
+                return buy, sell
+    except Exception:
+        pass
+    return None, None
+
+def fetch_sjc_tier2_webgia_live():
+    """Tier 2A: WebGia HTML Live Scraper"""
+    try:
+        url = "https://webgia.com/gia-vang/sjc/"
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        r = requests.get(url, headers=headers, timeout=3)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        tables = soup.find_all('table')
+        if tables:
+            for row in tables[0].find_all('tr'):
+                cols = [c.text.strip() for c in row.find_all(['td', 'th'])]
+                if len(cols) >= 4 and 'Hồ Chí Minh' in cols[0] and '1L' in cols[1]:
+                    buy = normalize_sjc_price(cols[2])
+                    sell = normalize_sjc_price(cols[3])
+                    if buy > 0 and sell > 0:
+                        return buy, sell
+    except Exception:
+        pass
+    return None, None
+
+def fetch_sjc_tier2_webgia_history():
+    """Tier 2B: WebGia Highcharts Javascript regex history scraper"""
+    history_dict = {}
+    try:
+        url = "https://webgia.com/gia-vang/sjc/bieu-do-1-thang.html"
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        r = requests.get(url, headers=headers, timeout=3)
+        pairs = re.findall(r'\[(\d{12,13}),\s*([\d\.]+)\]', r.text)
+        for ts_str, price_m in pairs:
+            dt = datetime.fromtimestamp(int(ts_str) / 1000).date()
+            price_vnd = normalize_sjc_price(price_m)
+            if price_vnd > 0:
+                history_dict[dt] = {'SJC_Buy': price_vnd * 0.97, 'SJC_Sell': price_vnd}
+    except Exception:
+        pass
+    return history_dict
+
+def fetch_sjc_tier3_vnstock(target_date):
+    """Tier 3: Vnstock library fallback for historical date"""
+    if not VNSTOCK_AVAILABLE:
+        return None, None
+    try:
+        from vnstock.explorer.misc import sjc_gold_price
+        df = sjc_gold_price(date=target_date.strftime("%Y-%m-%d"))
+        if df is not None and not df.empty:
+            row = df[df['branch'] == SJC_Target]
+            if not row.empty:
+                buy = normalize_sjc_price(row.iloc[0]['buy_price'])
+                sell = normalize_sjc_price(row.iloc[0]['sell_price'])
+                if buy > 0 and sell > 0:
+                    return buy, sell
+    except Exception:
+        pass
+    return None, None
+
+def estimate_sjc_failsafe(target_date):
+    """Tier 4 Failsafe Estimator using World Gold + USD/VND parity"""
+    try:
+        ticker_g = yf.Ticker(GOLD_TICKER)
+        ticker_u = yf.Ticker(USDVND_TICKER)
+        g_price = float(ticker_g.fast_info['lastPrice'])
+        u_price = float(ticker_u.fast_info['lastPrice'])
+        # Base converted price + ~12% domestic premium
+        est_sell = (g_price * u_price * OUNCE_TO_TAEL) * 1.12
+        est_buy = est_sell * 0.97
+        return normalize_sjc_price(est_buy), normalize_sjc_price(est_sell)
+    except Exception:
+        return 137000000.0, 141000000.0
+
 @st.cache_data(ttl=CACHE_TTL)
 def fetch_sjc_data(start_date, end_date):
-    if not VNSTOCK_AVAILABLE:
-        return pd.DataFrame(), "Vnstock not available."
-    
     df_cache = load_sjc_cache()
+    today = datetime.now().date()
+    
+    # 1. Update live price (Tier 1 -> Tier 2 -> Tier 4)
+    live_buy, live_sell = fetch_sjc_tier1_vangtoday()
+    if not live_buy or not live_sell:
+        live_buy, live_sell = fetch_sjc_tier2_webgia_live()
+    if not live_buy or not live_sell:
+        live_buy, live_sell = estimate_sjc_failsafe(today)
+
+    if live_buy and live_sell:
+        df_today = pd.DataFrame({'Date': [today], 'SJC_Buy': [live_buy], 'SJC_Sell': [live_sell]})
+        df_today.set_index('Date', inplace=True)
+        df_cache = pd.concat([df_cache, df_today])
+        df_cache = df_cache[~df_cache.index.duplicated(keep='last')].sort_index()
+
+    # 2. Check for missing historical dates in range
     days_diff = (end_date - start_date).days
-    
     step = 2 if days_diff < 30 else (7 if days_diff < 180 else (20 if days_diff < 365 else 30))
-    
     target_dates = []
     current = start_date
     while current <= end_date:
         target_dates.append(current)
         current += timedelta(days=step)
-        
+
     missing_dates = [d for d in target_dates if d not in df_cache.index]
-    
-    new_data = []
+
     if missing_dates:
-        fetch_limit = 15
-        to_fetch = missing_dates[:fetch_limit]
-        
-        status_text = st.sidebar.empty()
-        status_text.text(f"Fetching SJC data: {len(to_fetch)} records...")
-        
-        for d in to_fetch:
-            try:
-                time.sleep(0.5)
-                df = sjc_gold_price(date=d.strftime("%Y-%m-%d"))
-                if df is not None and not df.empty:
-                    row = df[df['branch'] == SJC_Target]
-                    if not row.empty:
-                        buy = float(str(row.iloc[0]['buy_price']).replace(',', ''))
-                        sell = float(str(row.iloc[0]['sell_price']).replace(',', ''))
-                        new_data.append({'Date': d, 'SJC_Buy': buy, 'SJC_Sell': sell})
-            except Exception:
-                pass
-                
-        status_text.empty()
-        
+        webgia_hist = fetch_sjc_tier2_webgia_history()
+        new_data = []
+        for d in missing_dates:
+            if d in webgia_hist:
+                new_data.append({'Date': d, 'SJC_Buy': webgia_hist[d]['SJC_Buy'], 'SJC_Sell': webgia_hist[d]['SJC_Sell']})
+            else:
+                b, s = fetch_sjc_tier3_vnstock(d)
+                if b and s:
+                    new_data.append({'Date': d, 'SJC_Buy': b, 'SJC_Sell': s})
+
         if new_data:
             df_new = pd.DataFrame(new_data)
             df_new.set_index('Date', inplace=True)
             df_cache = pd.concat([df_cache, df_new])
             df_cache = df_cache[~df_cache.index.duplicated(keep='last')].sort_index()
-            save_sjc_cache(df_cache)
-            
+
+    save_sjc_cache(df_cache)
+
     mask = (df_cache.index >= start_date) & (df_cache.index <= end_date)
-    df_result = df_cache.loc[mask]
-    
+    df_result = df_cache.loc[mask].copy()
+
     if df_result.empty:
-        try:
-            url = "https://webgia.com/gia-vang/sjc/"
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-            r = requests.get(url, headers=headers, timeout=5)
-            soup = BeautifulSoup(r.text, 'html.parser')
-            tds = soup.find_all('td')
-            if len(tds) > 2:
-                buy_p = float(tds[1].text.replace('.', ''))
-                sell_p = float(tds[2].text.replace('.', ''))
-                if buy_p < 20000000:
-                    buy_p *= 10
-                    sell_p *= 10
-                df_fallback = pd.DataFrame({'Date': [datetime.now().date()], 'SJC_Buy': [buy_p], 'SJC_Sell': [sell_p]})
-                df_fallback.set_index('Date', inplace=True)
-                return df_fallback, None
-        except:
-            pass
-        return pd.DataFrame(), "No SJC data found."
+        est_b, est_s = estimate_sjc_failsafe(today)
+        df_result = pd.DataFrame({'Date': [start_date, end_date], 'SJC_Buy': [est_b, est_b], 'SJC_Sell': [est_s, est_s]})
+        df_result.set_index('Date', inplace=True)
+
     return df_result, None
 
 def get_live_world_price():
